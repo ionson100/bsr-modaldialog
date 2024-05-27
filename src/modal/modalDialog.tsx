@@ -66,10 +66,13 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
     }
 
     componentDidMount() {
+        console.log(this.props)
+        alert(this.props.body as BaseBodyDialog)
         if(!this.props.icon&&!this.props.header&&this.mRefHeaderHost.current){
             this.mRefHeaderHost.current.remove()
         }
         try {
+
             this.baseDialog = this.props.body.type?.prototype as BaseBodyDialog
             if (this.baseDialog) {
                 this.baseDialog.selfCloseCore = (modeId) => {

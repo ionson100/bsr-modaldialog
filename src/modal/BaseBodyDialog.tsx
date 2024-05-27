@@ -3,17 +3,11 @@ import React from "react";
 export abstract class BaseBodyDialog extends React.Component<any, any> {
     public _id?: string
 
-
-
     public selfCloseCore:((modeId?:string)=>void)|undefined
     public constructor(props: any) {
         super(props);
         this._id = undefined
         this.selfCloseCore=undefined
-
-
-
-
 
     }
     setId(value:string){

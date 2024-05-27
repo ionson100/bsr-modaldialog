@@ -38,7 +38,7 @@ code {
   cursor: pointer;
   height: 24px;
   line-height: 24px;
-  padding: 0px 12px;
+  padding: 0 12px;
   margin-left: 10px;
   vertical-align: middle;
   width: auto;
@@ -53,6 +53,6 @@ code {
   color: rgb(255, 255, 255);
 }
 .b-65:focus {
-  background: red;
+  border: solid 1px #ee0c0c;
 }
 

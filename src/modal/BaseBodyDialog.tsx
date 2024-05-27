@@ -5,23 +5,25 @@ export abstract class BaseBodyDialog extends React.Component<any, any> {
 
 
 
+    public selfCloseCore:((modeId?:string)=>void)|undefined
     public constructor(props: any) {
         super(props);
         this._id = undefined
+        this.selfCloseCore=undefined
 
 
 
 
 
     }
+    setId(value:string){
+        this._id=value;
+    }
 
-    selfClose() {
-        const host = document.getElementById(this._id!)
-        alert(host)
-        if (host) {
-
-            document.body.removeChild<Node>(host);
-        }
+    selfClose(modeId?:string) {
+      if(this.selfCloseCore){
+          this.selfCloseCore(modeId)
+      }
     }
 
     abstract validate(modeId: string | null): boolean | undefined

@@ -2,7 +2,7 @@
 
 
 
-import {ParamsDialog} from "./madalDialog";
+import {ParamsDialog} from "./modalDialog";
 import {WrapperModal} from "./wrapperModal";
 
 

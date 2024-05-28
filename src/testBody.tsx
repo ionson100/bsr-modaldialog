@@ -1,9 +1,8 @@
-import {BaseBodyDialog} from "./modal/BaseBodyDialog";
+import {BaseBodyDialog} from "./modal";
 import React from "react";
 
 export class Assa extends BaseBodyDialog {
 
-    public id:number=23;
     public mRefFirstName: React.RefObject<HTMLInputElement>=React.createRef<HTMLInputElement>()
     public mRefEmail: React.RefObject<HTMLInputElement>=React.createRef<HTMLInputElement>()
     public mRefPassword: React.RefObject<HTMLInputElement>=React.createRef<HTMLInputElement>()
@@ -12,24 +11,41 @@ export class Assa extends BaseBodyDialog {
 
 
 
-    public validate(modeId: string): boolean {
-        if (!modeId || modeId === '2' || modeId === '-1') {
+    validate(mode: string|undefined): boolean {
+        this.mRefError.current!.innerText=''
+        if(mode==='100'){
+            return  false;
+        }
+
+        if (!mode || mode === '2' || mode === '-1') {
             return true;
         }
 
-        if (modeId === '1') {// click register
+        if (mode === '1') {// click register
 
 
-            alert(this.mRefFirstName)
-            // if(this.mRefFirstName!.current!.value===''){
-            //     this.mRefError.current!.innerText='Name empty'
-            //     return false;
-            // }
 
-            // request to server
-            // setTimeout(() => {
-            //     this.selfClose('0')
-            // }, 2000)
+            if(this.mRefFirstName.current!.value===''){
+                this.mRefError.current!.innerText='First name empty.'
+                return false;
+            }
+            if(this.mRefEmail.current!.value===''){
+                this.mRefError.current!.innerText='Email empty.'
+                return false;
+            }
+            if(this.mRefPassword.current!.value===''){
+                this.mRefError.current!.innerText='Password empty.'
+                return false;
+            }
+            if(this.mRefRole.current!.selectedIndex===0){
+                this.mRefError.current!.innerText='Role not selected.'
+                return false;
+            }
+
+            //request to server
+            setTimeout(() => {
+                this.selfClose('0')
+            }, 2000)
             return false
         }
         return false;
@@ -37,15 +53,21 @@ export class Assa extends BaseBodyDialog {
 
     }
 
-    getData(modeId: string): object | undefined {
+    getData(mode: string|undefined): object | undefined {
 
-        return {modeId: modeId, user_name: 'testUser'};
+
+        return {
+            userName:this.mRefFirstName.current?.value,
+            email:this.mRefEmail.current?.value,
+            password:this.mRefPassword.current?.value,
+            role:this.mRefRole.current?.value
+        };
     }
 
     componentDidMount() {
         this.validate=this.validate.bind(this);
         setTimeout(() => {
-            this.mRefFirstName!.current!.focus()// override focus button :close
+            this.mRefFirstName!.current!.focus()// override focus button dialog :close
         }, 100)
     }
 
@@ -54,7 +76,7 @@ export class Assa extends BaseBodyDialog {
             <div style={{paddingTop: 2, paddingBottom: 2}}>
 
                 <fieldset>
-                    <label ref={this.mRefError} style={{color:"red"}}>sdsdsd</label>
+                    <label ref={this.mRefError} style={{color:"red"}}/>
                     <h2>Sign Up</h2>
                     <div className="Field">
                         <label>First name <sup>*</sup></label>
@@ -82,9 +104,7 @@ export class Assa extends BaseBodyDialog {
                     </div>
 
                 </fieldset>
-
             </div>
         );
     }
-
 }

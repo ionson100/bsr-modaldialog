@@ -1,4 +1,5 @@
 import React from "react";
+import {hostDialog} from "./storegeDialog";
 
 export abstract class BaseBodyDialog extends React.Component<any, any> {
     public _id?: string
@@ -8,11 +9,18 @@ export abstract class BaseBodyDialog extends React.Component<any, any> {
         super(props);
         this._id = undefined
         this.selfCloseCore=undefined
+        setTimeout(() => {
+            if(hostDialog.currentDialog){
+                hostDialog.currentDialog.innerValidate=this.validate.bind(this)
+                hostDialog.currentDialog.innerGetData=this.getData.bind(this)
+                this.selfCloseCore=hostDialog.currentDialog.selfClose
+            }
+
+
+        }, 1);
 
     }
-    setId(value:string){
-        this._id=value;
-    }
+
 
     selfClose(modeId?:string) {
       if(this.selfCloseCore){
@@ -20,7 +28,7 @@ export abstract class BaseBodyDialog extends React.Component<any, any> {
       }
     }
 
-    abstract validate(modeId: string | null): boolean | undefined
+    abstract validate(mode: string | undefined): boolean | undefined
 
-    abstract getData(modeId: string | null): object | undefined
+    abstract getData(mode: string | undefined): object | undefined
 }

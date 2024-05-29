@@ -4,11 +4,11 @@ import "./index.css"
 import {IoMdClose} from "react-icons/io";
 import {hostDialog} from "./storegeDialog";
 import {v4 as uuidv4} from 'uuid';
-import {findHighestZIndex} from "./maxZIndex";
 
-type ResolvePromise = {
+
+ export type ResolvePromise = {
     ok: boolean
-    mode: string | null|undefined
+    mode: string | null | undefined
     dataBody?: object | undefined
 }
 
@@ -20,13 +20,23 @@ export type ParamsDialog = {
     style?: React.CSSProperties | undefined,
     styleHeader?: React.CSSProperties | undefined,
     styleFooter?: React.CSSProperties | undefined,
-    position?: 'center'  | 'top',
-    container?: Node,
+    position?: 'center' | 'top',
+    modal?: boolean,
+    onCancel?: (dialog: InstanceType<typeof HTMLDialogElement> | undefined) => boolean;
+    onClose?: (dialog: InstanceType<typeof HTMLDialogElement> | undefined) => void;
+    onShow?: (dialog: InstanceType<typeof HTMLDialogElement> | undefined) => void;
+    timeOut?: number
+    __container?: Node,
     id?: string | undefined,
     _promise?: {
         resolve: (value: ResolvePromise) => void, reject: (reason?: any) => void
     },
-    className?:string;
+    className?: string;
+    classNameHeader?: string;
+    classNameBody?: string;
+    classNameFooter?: string;
+    classNameTopStripe?: string;
+    classNameBottomStripe?: string;
 
 }
 
@@ -36,22 +46,31 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
     static defaultProps: ParamsDialog = {
         id: undefined,
         body: undefined, buttons: [], position: 'center',
-        className:"main-dialog"
+        className: "main-dialog",
+        modal: true,
+        onCancel: () => {
+            return true;
+        },
+        classNameBody: "m-body",
+        classNameFooter: "m-footer",
+        classNameHeader: "m-header",
+        classNameTopStripe: "top-stripe",
+        classNameBottomStripe: "bottom-stripe"
 
     }
 
     public body: any | undefined;
     public promiseInfo: object
 
-    public mRefDialog: React.RefObject<HTMLDivElement>
-    public mRefBlender: React.RefObject<HTMLDivElement>
+    public mRefDialog: React.RefObject<HTMLDialogElement>
+
 
     public mRefButtonHost: React.RefObject<HTMLDivElement>
     public mRefHeaderHost: React.RefObject<HTMLDivElement>
     public mRefBodyHost: React.RefObject<HTMLDivElement>
-    public mRefFocusDiv:React.RefObject<HTMLDivElement>
+    public mRefFocusDiv: React.RefObject<HTMLDivElement>
 
-    public host: HTMLElement | null
+
     public oldDialog: ModalDialog | undefined
     public moduleIdCore: string;
     public innerValidate: ((mode: string | undefined) => boolean | undefined) | undefined
@@ -78,22 +97,26 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         this.innerValidate = undefined
         this.innerGetData = undefined;
         this.mRefHeaderHost = React.createRef<HTMLDivElement>();
-        this.mRefDialog = React.createRef<HTMLDivElement>();
-        this.mRefBlender= React.createRef<HTMLDivElement>();
-
+        this.mRefDialog = React.createRef<HTMLDialogElement>();
         this.mRefButtonHost = React.createRef<HTMLDivElement>();
         this.mRefBodyHost = React.createRef<HTMLDivElement>();
+        this.mRefFocusDiv = React.createRef<HTMLDivElement>();
+
         this.clickButton = this.clickButton.bind(this)
-        this.mRefFocusDiv =React.createRef<HTMLDivElement>();
-
-
-        // @ts-ignore
-        this.host = undefined
         this.checkGlobal();
     }
 
-    __innerCloseDom() {
-        document.body.removeChild<Node>(this.host!);
+    __innerCloseDom(value: ResolvePromise | undefined) {
+        this.mRefDialog.current?.close()
+        const host = document.getElementById(this.props.id!)
+        if (host) {
+            document.body.removeChild<Node>(host);
+        }
+
+        if (value) {
+            this.props._promise?.resolve(value);
+        }
+
     }
 
     checkGlobal() {
@@ -112,28 +135,61 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
 
     componentDidMount() {
 
+        if (this.props.modal === true) {
+            this.mRefDialog.current?.showModal()
+            this.dialog!.oncancel = (ev) => {
+                if (this.innerValidate) {
+                    const res = this.innerValidate("-2");
+                    if (res === true) {
+                        this.__innerCloseDom({ok: false, mode: '-2', dataBody: undefined});
+                    }
+                } else {
+                    const d = this.props.onCancel!(this.dialog!)
+                    if (d) {
+                        this.__innerCloseDom({ok: false, mode: '-2', dataBody: undefined});
+                    }
+                }
+                return false
+            }
+        } else {
+            this.mRefDialog.current?.show()
+        }
+        this.dialog!.onclose = (ev) => {
+            if (this.props.onClose) {
+                this.props.onClose(this.dialog!)
+            }
+        }
+
+
         if (!this.props.icon && !this.props.header && this.mRefHeaderHost.current) {
             this.mRefHeaderHost.current.remove()
         }
+        if (this.props.buttons?.length == 0) {
+            this.mRefButtonHost.current?.remove();
+        }
 
-        this.host = document.getElementById(this.props.id!)
-        if(this.mRefFocusDiv.current&&this.mRefFocusDiv.current.children[0]){
+
+        if (this.mRefFocusDiv.current && this.mRefFocusDiv.current.children[0]) {
             (this.mRefFocusDiv.current.children[0] as HTMLElement)!.focus()
         }
-        // document.querySelectorAll('[data-focus="true"]').forEach((a: Element) => {
-        //     const d: HTMLElement = a as HTMLElement
-        //     if (d) {
-        //         d.focus()
-        //     }
-        // });
-        const  index:number=findHighestZIndex('div')
-        this.mRefBlender.current!.style.zIndex=""+(index+1);
-        this.mRefDialog.current!.style.zIndex=""+(index+2);
-        if(this.props.position==='top'){
+        if (this.props.position === 'top') {
 
-            this.mRefDialog.current!.style.top="-80%"
+            this.mRefDialog.current!.style.top = "-60%"
 
         }
+        if (this.props.onShow) {
+            this.props.onShow(this.dialog!)
+        }
+        if (this.props.timeOut) {
+            setTimeout(() => {
+                this.__innerCloseDom({ok: false, mode: "-1", dataBody: undefined})
+            }, this.props.timeOut)
+        }
+
+    }
+
+    public get dialog(): HTMLDialogElement | null | undefined {
+        return this.mRefDialog.current
     }
 
 
@@ -144,19 +200,18 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         } else {
             hostDialog.currentDialog = this.oldDialog;
         }
-        this.__innerCloseDom()
+        this.__innerCloseDom(undefined)
     }
 
     closeModal = () => {
-        this.__innerCloseDom()
-        this.props._promise?.resolve({ok: false, mode: '-1', dataBody: undefined});
+        this.__innerCloseDom({ok: false, mode: '-1', dataBody: undefined})
+
     }
 
-    clickButton(e: React.MouseEvent<HTMLDivElement> | undefined,mode:string|null|undefined) {
+    clickButton(e: React.MouseEvent<HTMLDivElement> | undefined, mode: string | null | undefined) {
 
 
-
-        const d:string|null|undefined = mode!.toString();//(e?.target as HTMLElement).getAttribute('data-mode');
+        const d: string | null | undefined = mode!.toString();//(e?.target as HTMLElement).getAttribute('data-mode');
 
         if (d === "-1") {
             this.closeModal();
@@ -168,31 +223,30 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         }
         if (this.innerGetData) {
             const data = this.innerGetData(d!);
-            this.props._promise?.resolve({ok: true, mode: d, dataBody: data});
-            this.__innerCloseDom()
+            this.__innerCloseDom({ok: true, mode: d, dataBody: data})
             return;
         }
 
-        this.props._promise?.resolve({ok: true, mode: d, dataBody: undefined});
-        this.__innerCloseDom()
+
+        this.__innerCloseDom({ok: true, mode: d, dataBody: undefined})
 
     }
 
     renderButtons(): any {
         const divs: ReactElement[] = [];
-        let add=true;
-        this.props.buttons!.forEach((button,index) => {
-            const dataMode:string|null|undefined=button.props['data-mode']
-            const focus=button.props['data-focus']
-            if(focus&&add===true){
+        let add = true;
+        this.props.buttons!.forEach((button, index) => {
+            const dataMode: string | null | undefined = button.props['data-mode']
+            const focus = button.props['data-focus']
+            if (focus && add) {
 
-                divs.push(<div ref={this.mRefFocusDiv} key={index} onClick={(e)=>{
-                    this.clickButton(e,dataMode)
+                divs.push(<div ref={this.mRefFocusDiv} key={index} onClick={(e) => {
+                    this.clickButton(e, dataMode)
                 }}>{button}</div>)
-                add=false;
-            }else{
-                divs.push(<div key={index} onClick={(e)=>{
-                    this.clickButton(e,dataMode)
+                add = false;
+            } else {
+                divs.push(<div key={index} onClick={(e) => {
+                    this.clickButton(e, dataMode)
                 }}>{button}</div>)
             }
             //
@@ -216,30 +270,29 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
     render() {
 
 
-
         return (
             <>
-                <div className={'blender'} ref={this.mRefBlender}></div>
-                <div className={this.props.className} style={this.props.style} ref={this.mRefDialog} >
-                    <div ref={this.mRefHeaderHost} className={'m-header'}>
+
+                <dialog className={this.props.className} style={this.props.style} ref={this.mRefDialog}>
+                    <div ref={this.mRefHeaderHost} className={this.props.classNameHeader}>
                         <div style={{width: 'fit-content'}}>{this.props.icon}</div>
                         <div style={{width: '100%'}}>{this.props.header}</div>
                         <IoMdClose className={'icon-close'} onClick={this.closeModal}/>
                     </div>
-                    <div className={'band-1'}></div>
+                    <div className={this.props.classNameTopStripe}></div>
 
-                    <div ref={this.mRefBodyHost} className={'m-body'}>
+                    <div ref={this.mRefBodyHost} className={this.props.classNameBody}>
                         {
                             this.props.body
                         }
                     </div>
-                    <div className={'band-2'}></div>
-                    <div ref={this.mRefButtonHost} className={'m-footer'}>
+                    <div className={this.props.classNameBottomStripe}></div>
+                    <div ref={this.mRefButtonHost} className={this.props.classNameFooter}>
                         {
                             this.renderButtons()
                         }
                     </div>
-                </div>
+                </dialog>
             </>
 
         );

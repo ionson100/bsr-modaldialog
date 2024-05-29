@@ -1,8 +1,11 @@
-import ShowModalDialog from "./main";
+import ShowBsrDialog from "./main";
 import {BaseBodyDialog} from "./BaseBodyDialog";
+import {ParamsDialog} from './modalDialog'
 
-export default ShowModalDialog;
+
 export {
-    BaseBodyDialog
+    ShowBsrDialog,
+    BaseBodyDialog,
+    ParamsDialog
 }
 

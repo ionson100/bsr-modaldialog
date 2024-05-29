@@ -4,7 +4,7 @@ import {hostDialog} from "./storegeDialog";
 export abstract class BaseBodyDialog extends React.Component<any, any> {
     public _id?: string
 
-    public selfCloseCore:((modeId?:string)=>void)|undefined
+    private selfCloseCore:((modeId?:string)=>void)|undefined
     public constructor(props: any) {
         super(props);
         this._id = undefined

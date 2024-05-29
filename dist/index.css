@@ -1,0 +1,79 @@
+
+
+.main-dialog {
+    display: block;
+
+    position: absolute;
+    margin: auto;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    padding: 0;
+
+
+    width: 500px;
+    height: fit-content;
+    z-index: 2;
+    background: white;
+    border: thick double #32a1ce;
+
+    border-radius: 5px;
+    box-shadow: rgba(0, 0, 0, 0.19) 0 10px 20px, rgba(0, 0, 0, 0.23) 0 6px 6px;
+}
+
+
+
+
+
+.icon-close {
+    color: black;
+    cursor: pointer;
+    size: 25px;
+}
+
+.icon-close:hover {
+    color: #ffffff;
+    background: darkgray;
+}
+
+.icon-close:active {
+    color: #f10a0a;
+    background: darkgray;
+}
+
+
+.m-header {
+
+    display: flex;
+    padding: 5px;
+
+}
+
+.m-body {
+
+    /*height: 90%;*/
+}
+
+.m-footer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: right;
+
+    text-align: right;
+    padding: 10px;
+
+
+}
+
+.top-stripe {
+    height: 1px;
+    background: #e8e8e8;
+}
+
+.bottom-stripe {
+    height: 1px;
+    background: #e8e8e8;
+}
+
+

@@ -1,4 +1,4 @@
-import React, {ReactElement} from "react";
+import React, {MouseEventHandler, ReactElement} from "react";
 
 ///import "./index.css"
 import {IoMdClose} from "react-icons/io";
@@ -13,23 +13,105 @@ export type ResolvePromise = {
 }
 
 export type ParamsDialog = {
+    /**
+     * Closing a modal dialog by clicking an empty area
+     */
+    closeModalDialogClickForeignArea?: boolean
+
+    /**
+     * A reference to the modal dialog object.
+     * Will be useful for closing the dialog programmatically
+     */
     refDialog?: React.RefObject<InstanceType<typeof ModalDialog>> | null
+
+    /**
+     * Dialogue head icon
+     */
     icon?: any,
+
+    /**
+     * Dialogue title content
+     */
     header?: any | undefined,
+
+    /**
+     * Dialogue body content
+     */
     body?: any | undefined,
+
+    /**
+     * Array of dialog buttons
+     */
     buttons?: ReactElement[]
+
+    /**
+     * Dialogue styles
+     */
     style?: React.CSSProperties | undefined,
+
+    /**
+     * Dialog Title Styles
+     */
     styleHeader?: React.CSSProperties | undefined,
+
+    /**
+     * Dialog Footer Styles
+     */
     styleFooter?: React.CSSProperties | undefined,
+
+    /**
+     * Dialog Body Styles
+     */
     styleBody?: React.CSSProperties | undefined,
+
+    /**
+     * Position of dialogue on screen
+     */
     position?: 'center' | 'top',
+
+
+    /**
+     * Dialogue type, modal or non-modal
+     */
     modal?: boolean,
+
+    /**
+     * The event occurs before the modal dialog is closed using the Esc button
+     * @param dialog HTMLDialogElement
+     */
     onCancel?: (dialog: InstanceType<typeof HTMLDialogElement> | undefined) => boolean;
+
+    /***
+     * Event when closing a dialog
+     * @param dialog HTMLDialogElement
+     */
     onClose?: (dialog: InstanceType<typeof HTMLDialogElement> | undefined) => void;
+
+
+    /**
+     * Event when opening a dialog
+     * @param dialog HTMLDialogElement
+     */
     onShow?: (dialog: InstanceType<typeof HTMLDialogElement> | undefined) => void;
+
+    /**
+     * Time in milliseconds until the dialog is automatically closed if the dialog is used as an alert
+     */
     timeOut?: number
+
+    /**
+     * for private use
+     */
     __container?: Node,
-    id?: string | undefined,
+
+    /**
+     * for private use
+     */
+    _id?: string | undefined,
+
+    /**
+     * for private use
+     */
     _promise?: {
         resolve: (value: ResolvePromise) => void, reject: (reason?: any) => void
     },
@@ -46,7 +128,7 @@ export type ParamsDialog = {
 export class ModalDialog extends React.Component<ParamsDialog, any> {
 
     static defaultProps: ParamsDialog = {
-        id: undefined,
+        _id: undefined,
         body: undefined, buttons: [], position: 'center',
         className: "main-dialog",
         modal: true,
@@ -78,7 +160,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
     public innerValidate: ((mode: string | undefined) => boolean | undefined) | undefined
     public innerGetData: ((mode: string | undefined) => object | undefined) | undefined
     public selfClose: (mode: string | undefined) => void = (mode) => {
-        const host = document.getElementById(this.props.id!)
+        const host = document.getElementById(this.props._id!)
         if (host) {
             const modeCore = mode ? mode : "no data"
             this.props._promise?.resolve({ok: true, mode: modeCore, dataBody: this.innerGetData!(mode!)});
@@ -110,7 +192,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
 
     __innerCloseDom(value: ResolvePromise | undefined) {
         this.mRefDialog.current?.close()
-        const host = document.getElementById(this.props.id!)
+        const host = document.getElementById(this.props._id!)
         if (host) {
             document.body.removeChild<Node>(host);
         }
@@ -157,6 +239,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
                 }
                 return false
             }
+
         } else {
             this.mRefDialog.current?.show()
         }
@@ -270,27 +353,35 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         return (
             <>
 
-                <dialog className={this.props.className} style={this.props.style} ref={this.mRefDialog}>
-                    <div ref={this.mRefHeaderHost} style={this.props.styleHeader}
-                         className={this.props.classNameHeader}>
-                        <div style={{width: 'fit-content'}}>{this.props.icon}</div>
-                        <div style={{width: '100%'}}>{this.props.header}</div>
-                        <IoMdClose className={'icon-close'} onClick={this.closeModal}/>
-                    </div>
-                    <div className={this.props.classNameTopStripe}></div>
+                <dialog onClick={(e) => {
+                    this.clickDialog(e)
+                }} className={this.props.className} style={this.props.style} ref={this.mRefDialog}>
 
-                    <div ref={this.mRefBodyHost} style={this.props.styleBody} className={this.props.classNameBody}>
-                        {
-                            this.props.body
-                        }
+                    <div className={'wrapper-inner-dialog'}>
+                        <div ref={this.mRefHeaderHost} style={this.props.styleHeader}
+                             className={this.props.classNameHeader}>
+                            <div style={{width: 'fit-content'}}>{this.props.icon}</div>
+                            <div style={{width: '100%'}}>{this.props.header}</div>
+                            <IoMdClose className={'icon-close'} onClick={this.closeModal}/>
+                        </div>
+                        <div className={this.props.classNameTopStripe}></div>
+
+                        <div ref={this.mRefBodyHost} style={this.props.styleBody} className={this.props.classNameBody}>
+                            {
+                                this.props.body
+                            }
+                        </div>
+                        <div className={this.props.classNameBottomStripe}></div>
+                        <div ref={this.mRefButtonHost} style={this.props.styleFooter}
+                             className={this.props.classNameFooter}>
+                            {
+                                this.renderButtons()
+                            }
+                        </div>
+
                     </div>
-                    <div className={this.props.classNameBottomStripe}></div>
-                    <div ref={this.mRefButtonHost} style={this.props.styleFooter}
-                         className={this.props.classNameFooter}>
-                        {
-                            this.renderButtons()
-                        }
-                    </div>
+
+
                 </dialog>
             </>
 
@@ -298,4 +389,12 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
     }
 
 
+    private clickDialog(e: React.MouseEvent<HTMLDialogElement>) {
+        if (this.props.modal === true && this.props.closeModalDialogClickForeignArea === true) {
+            if (e.currentTarget === e.target) {
+                this.__innerCloseDom({ok: false, mode: "-2"})
+            }
+        }
+
+    }
 }

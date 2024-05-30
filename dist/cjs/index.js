@@ -3020,7 +3020,7 @@ var ModalDialog = /** @class */ (function (_super) {
         var _this = _super.call(this, props) || this;
         _this.selfClose = function (mode) {
             var _a;
-            var host = document.getElementById(_this.props.id);
+            var host = document.getElementById(_this.props._id);
             if (host) {
                 var modeCore = mode ? mode : "no data";
                 (_a = _this.props._promise) === null || _a === void 0 ? void 0 : _a.resolve({ ok: true, mode: modeCore, dataBody: _this.innerGetData(mode) });
@@ -3050,7 +3050,7 @@ var ModalDialog = /** @class */ (function (_super) {
     ModalDialog.prototype.__innerCloseDom = function (value) {
         var _a, _b;
         (_a = this.mRefDialog.current) === null || _a === void 0 ? void 0 : _a.close();
-        var host = document.getElementById(this.props.id);
+        var host = document.getElementById(this.props._id);
         if (host) {
             document.body.removeChild(host);
         }
@@ -3182,19 +3182,30 @@ var ModalDialog = /** @class */ (function (_super) {
         return divs;
     };
     ModalDialog.prototype.render = function () {
+        var _this = this;
         return (React.createElement(React.Fragment, null,
-            React.createElement("dialog", { className: this.props.className, style: this.props.style, ref: this.mRefDialog },
-                React.createElement("div", { ref: this.mRefHeaderHost, style: this.props.styleHeader, className: this.props.classNameHeader },
-                    React.createElement("div", { style: { width: 'fit-content' } }, this.props.icon),
-                    React.createElement("div", { style: { width: '100%' } }, this.props.header),
-                    React.createElement(IoMdClose, { className: 'icon-close', onClick: this.closeModal })),
-                React.createElement("div", { className: this.props.classNameTopStripe }),
-                React.createElement("div", { ref: this.mRefBodyHost, style: this.props.styleBody, className: this.props.classNameBody }, this.props.body),
-                React.createElement("div", { className: this.props.classNameBottomStripe }),
-                React.createElement("div", { ref: this.mRefButtonHost, style: this.props.styleFooter, className: this.props.classNameFooter }, this.renderButtons()))));
+            React.createElement("dialog", { onClick: function (e) {
+                    _this.clickDialog(e);
+                }, className: this.props.className, style: this.props.style, ref: this.mRefDialog },
+                React.createElement("div", { className: 'wrapper-inner-dialog' },
+                    React.createElement("div", { ref: this.mRefHeaderHost, style: this.props.styleHeader, className: this.props.classNameHeader },
+                        React.createElement("div", { style: { width: 'fit-content' } }, this.props.icon),
+                        React.createElement("div", { style: { width: '100%' } }, this.props.header),
+                        React.createElement(IoMdClose, { className: 'icon-close', onClick: this.closeModal })),
+                    React.createElement("div", { className: this.props.classNameTopStripe }),
+                    React.createElement("div", { ref: this.mRefBodyHost, style: this.props.styleBody, className: this.props.classNameBody }, this.props.body),
+                    React.createElement("div", { className: this.props.classNameBottomStripe }),
+                    React.createElement("div", { ref: this.mRefButtonHost, style: this.props.styleFooter, className: this.props.classNameFooter }, this.renderButtons())))));
+    };
+    ModalDialog.prototype.clickDialog = function (e) {
+        if (this.props.modal === true && this.props.closeModalDialogClickForeignArea === true) {
+            if (e.currentTarget === e.target) {
+                this.__innerCloseDom({ ok: false, mode: "-2" });
+            }
+        }
     };
     ModalDialog.defaultProps = {
-        id: undefined,
+        _id: undefined,
         body: undefined, buttons: [], position: 'center',
         className: "main-dialog",
         modal: true,
@@ -34204,7 +34215,7 @@ var WrapperModal = /** @class */ (function () {
                         myDiv.setAttribute("data-root-m-dialog", 'true');
                         document.body.append(myDiv);
                         props.__container = myDiv;
-                        props.id = uuid;
+                        props._id = uuid;
                         props._promise = { reject: reject, resolve: resolve };
                         var root = client.createRoot(myDiv);
                         root.render(React.createElement(ModalDialog, __assign({ ref: props.refDialog }, props)));
@@ -34253,4 +34264,5 @@ var BaseBodyDialog = /** @class */ (function (_super) {
 }(React.Component));
 
 exports.BaseBodyDialog = BaseBodyDialog;
+exports.ModalDialog = ModalDialog;
 exports.ShowBsrDialog = ShowBsrDialog;

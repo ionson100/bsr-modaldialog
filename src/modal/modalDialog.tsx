@@ -1,6 +1,6 @@
 import React, {ReactElement} from "react";
 
-import "./index.css"
+///import "./index.css"
 import {IoMdClose} from "react-icons/io";
 import {hostDialog} from "./storegeDialog";
 import {v4 as uuidv4} from 'uuid';
@@ -20,6 +20,7 @@ export type ParamsDialog = {
     style?: React.CSSProperties | undefined,
     styleHeader?: React.CSSProperties | undefined,
     styleFooter?: React.CSSProperties | undefined,
+    styleBody?: React.CSSProperties | undefined,
     position?: 'center' | 'top',
     modal?: boolean,
     onCancel?: (dialog: InstanceType<typeof HTMLDialogElement> | undefined) => boolean;
@@ -274,20 +275,20 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
             <>
 
                 <dialog className={this.props.className} style={this.props.style} ref={this.mRefDialog}>
-                    <div ref={this.mRefHeaderHost} className={this.props.classNameHeader}>
+                    <div ref={this.mRefHeaderHost} style={this.props.styleHeader} className={this.props.classNameHeader}>
                         <div style={{width: 'fit-content'}}>{this.props.icon}</div>
                         <div style={{width: '100%'}}>{this.props.header}</div>
                         <IoMdClose className={'icon-close'} onClick={this.closeModal}/>
                     </div>
                     <div className={this.props.classNameTopStripe}></div>
 
-                    <div ref={this.mRefBodyHost} className={this.props.classNameBody}>
+                    <div ref={this.mRefBodyHost} style={this.props.styleBody} className={this.props.classNameBody}>
                         {
                             this.props.body
                         }
                     </div>
                     <div className={this.props.classNameBottomStripe}></div>
-                    <div ref={this.mRefButtonHost} className={this.props.classNameFooter}>
+                    <div ref={this.mRefButtonHost} style={this.props.styleFooter} className={this.props.classNameFooter}>
                         {
                             this.renderButtons()
                         }

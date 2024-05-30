@@ -2887,36 +2887,6 @@ if (process.env.NODE_ENV === 'production') {
 var reactExports = react.exports;
 var React = /*@__PURE__*/getDefaultExportFromCjs(reactExports);
 
-function styleInject(css, ref) {
-  if ( ref === void 0 ) ref = {};
-  var insertAt = ref.insertAt;
-
-  if (typeof document === 'undefined') { return; }
-
-  var head = document.head || document.getElementsByTagName('head')[0];
-  var style = document.createElement('style');
-  style.type = 'text/css';
-
-  if (insertAt === 'top') {
-    if (head.firstChild) {
-      head.insertBefore(style, head.firstChild);
-    } else {
-      head.appendChild(style);
-    }
-  } else {
-    head.appendChild(style);
-  }
-
-  if (style.styleSheet) {
-    style.styleSheet.cssText = css;
-  } else {
-    style.appendChild(document.createTextNode(css));
-  }
-}
-
-var css_248z = "\r\n\r\n.main-dialog {\r\n    display: block;\r\n\r\n    position: absolute;\r\n    margin: auto;\r\n    top: 0;\r\n    right: 0;\r\n    bottom: 0;\r\n    left: 0;\r\n    padding: 0;\r\n\r\n\r\n    width: 500px;\r\n    height: fit-content;\r\n    z-index: 2;\r\n    background: white;\r\n    border: thick double #32a1ce;\r\n\r\n    border-radius: 5px;\r\n    box-shadow: rgba(0, 0, 0, 0.19) 0 10px 20px, rgba(0, 0, 0, 0.23) 0 6px 6px;\r\n}\r\n\r\n\r\n\r\n\r\n\r\n.icon-close {\r\n    color: black;\r\n    cursor: pointer;\r\n    size: 25px;\r\n}\r\n\r\n.icon-close:hover {\r\n    color: #ffffff;\r\n    background: darkgray;\r\n}\r\n\r\n.icon-close:active {\r\n    color: #f10a0a;\r\n    background: darkgray;\r\n}\r\n\r\n\r\n.m-header {\r\n\r\n    display: flex;\r\n    padding: 5px;\r\n\r\n}\r\n\r\n.m-body {\r\n\r\n    /*height: 90%;*/\r\n}\r\n\r\n.m-footer {\r\n    display: flex;\r\n    align-items: flex-end;\r\n    justify-content: right;\r\n\r\n    text-align: right;\r\n    padding: 10px;\r\n\r\n\r\n}\r\n\r\n.top-stripe {\r\n    height: 1px;\r\n    background: #e8e8e8;\r\n}\r\n\r\n.bottom-stripe {\r\n    height: 1px;\r\n    background: #e8e8e8;\r\n}\r\n\r\n\r\n";
-styleInject(css_248z);
-
 var DefaultContext = {
   color: undefined,
   size: undefined,
@@ -3112,7 +3082,7 @@ var ModalDialog = /** @class */ (function (_super) {
                 }
                 else {
                     var d = _this.props.onCancel(_this.dialog);
-                    if (d === true) {
+                    if (d) {
                         _this.__innerCloseDom({ ok: false, mode: '-2', dataBody: undefined });
                     }
                 }
@@ -3190,7 +3160,7 @@ var ModalDialog = /** @class */ (function (_super) {
         this.props.buttons.forEach(function (button, index) {
             var dataMode = button.props['data-mode'];
             var focus = button.props['data-focus'];
-            if (focus && add === true) {
+            if (focus && add) {
                 divs.push(React.createElement("div", { ref: _this.mRefFocusDiv, key: index, onClick: function (e) {
                         _this.clickButton(e, dataMode);
                     } }, button));
@@ -3214,14 +3184,14 @@ var ModalDialog = /** @class */ (function (_super) {
     ModalDialog.prototype.render = function () {
         return (React.createElement(React.Fragment, null,
             React.createElement("dialog", { className: this.props.className, style: this.props.style, ref: this.mRefDialog },
-                React.createElement("div", { ref: this.mRefHeaderHost, className: this.props.classNameHeader },
+                React.createElement("div", { ref: this.mRefHeaderHost, style: this.props.styleHeader, className: this.props.classNameHeader },
                     React.createElement("div", { style: { width: 'fit-content' } }, this.props.icon),
                     React.createElement("div", { style: { width: '100%' } }, this.props.header),
                     React.createElement(IoMdClose, { className: 'icon-close', onClick: this.closeModal })),
                 React.createElement("div", { className: this.props.classNameTopStripe }),
-                React.createElement("div", { ref: this.mRefBodyHost, className: this.props.classNameBody }, this.props.body),
+                React.createElement("div", { ref: this.mRefBodyHost, style: this.props.styleBody, className: this.props.classNameBody }, this.props.body),
                 React.createElement("div", { className: this.props.classNameBottomStripe }),
-                React.createElement("div", { ref: this.mRefButtonHost, className: this.props.classNameFooter }, this.renderButtons()))));
+                React.createElement("div", { ref: this.mRefButtonHost, style: this.props.styleFooter, className: this.props.classNameFooter }, this.renderButtons()))));
     };
     ModalDialog.defaultProps = {
         id: undefined,

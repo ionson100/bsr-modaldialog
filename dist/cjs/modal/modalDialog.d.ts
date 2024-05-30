@@ -1,5 +1,4 @@
 import React, { ReactElement } from "react";
-import "./index.css";
 export type ResolvePromise = {
     ok: boolean;
     mode: string | null | undefined;
@@ -13,6 +12,7 @@ export type ParamsDialog = {
     style?: React.CSSProperties | undefined;
     styleHeader?: React.CSSProperties | undefined;
     styleFooter?: React.CSSProperties | undefined;
+    styleBody?: React.CSSProperties | undefined;
     position?: 'center' | 'top';
     modal?: boolean;
     onCancel?: (dialog: InstanceType<typeof HTMLDialogElement> | undefined) => boolean;

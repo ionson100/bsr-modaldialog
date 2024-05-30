@@ -13,6 +13,7 @@ type ParamsDialog = {
     style?: React.CSSProperties | undefined;
     styleHeader?: React.CSSProperties | undefined;
     styleFooter?: React.CSSProperties | undefined;
+    styleBody?: React.CSSProperties | undefined;
     position?: 'center' | 'top';
     modal?: boolean;
     onCancel?: (dialog: InstanceType<typeof HTMLDialogElement> | undefined) => boolean;

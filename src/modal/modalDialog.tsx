@@ -108,7 +108,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         this.checkGlobal();
     }
 
-    private __innerCloseDom(value: ResolvePromise | undefined) {
+    __innerCloseDom(value: ResolvePromise | undefined) {
         this.mRefDialog.current?.close()
         const host = document.getElementById(this.props.id!)
         if (host) {
@@ -262,7 +262,6 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         })
         return divs
     }
-
 
 
     render() {

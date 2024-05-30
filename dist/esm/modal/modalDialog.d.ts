@@ -50,7 +50,7 @@ export declare class ModalDialog extends React.Component<ParamsDialog, any> {
     constructor({ props }: {
         props: Readonly<ParamsDialog>;
     });
-    private __innerCloseDom;
+    __innerCloseDom(value: ResolvePromise | undefined): void;
     closeDialog(mode: string | undefined | null): void;
     private checkGlobal;
     componentDidMount(): void;

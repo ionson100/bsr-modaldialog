@@ -53,13 +53,13 @@ declare class ModalDialog extends React.Component<ParamsDialog, any> {
     });
     __innerCloseDom(value: ResolvePromise | undefined): void;
     closeDialog(mode: string | undefined | null): void;
-    private checkGlobal;
+    checkGlobal(): void;
     componentDidMount(): void;
     get dialog(): HTMLDialogElement | null | undefined;
     componentWillUnmount(): void;
-    private closeModal;
-    private clickButton;
-    private renderButtons;
+    closeModal: () => void;
+    clickButton(e: React.MouseEvent<HTMLDivElement> | undefined, mode: string | null | undefined): void;
+    renderButtons(): any;
     render(): React.JSX.Element;
 }
 

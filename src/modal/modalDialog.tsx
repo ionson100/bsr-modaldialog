@@ -125,7 +125,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         this.__innerCloseDom({ok: false, mode: mode, dataBody: undefined})
     }
 
-    private checkGlobal() {
+    checkGlobal() {
 
 
         this.oldDialog = hostDialog.currentDialog
@@ -209,12 +209,12 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         this.__innerCloseDom(undefined)
     }
 
-    private closeModal = () => {
+    closeModal = () => {
         this.__innerCloseDom({ok: false, mode: '-1', dataBody: undefined})
 
     }
 
-    private clickButton(e: React.MouseEvent<HTMLDivElement> | undefined, mode: string | null | undefined) {
+    clickButton(e: React.MouseEvent<HTMLDivElement> | undefined, mode: string | null | undefined) {
 
 
         const d: string | null | undefined = mode!.toString();//(e?.target as HTMLElement).getAttribute('data-mode');
@@ -238,7 +238,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
 
     }
 
-    private renderButtons(): any {
+    renderButtons(): any {
         const divs: ReactElement[] = [];
         let add = true;
         this.props.buttons!.forEach((button, index) => {

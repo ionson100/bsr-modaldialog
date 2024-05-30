@@ -6,6 +6,7 @@ type ResolvePromise = {
     dataBody?: object | undefined;
 };
 type ParamsDialog = {
+    refDialog?: React.RefObject<InstanceType<typeof ModalDialog>> | null;
     icon?: any;
     header?: any | undefined;
     body?: any | undefined;
@@ -33,6 +34,34 @@ type ParamsDialog = {
     classNameTopStripe?: string;
     classNameBottomStripe?: string;
 };
+declare class ModalDialog extends React.Component<ParamsDialog, any> {
+    static defaultProps: ParamsDialog;
+    body: any | undefined;
+    promiseInfo: object;
+    mRefDialog: React.RefObject<HTMLDialogElement>;
+    mRefButtonHost: React.RefObject<HTMLDivElement>;
+    mRefHeaderHost: React.RefObject<HTMLDivElement>;
+    mRefBodyHost: React.RefObject<HTMLDivElement>;
+    mRefFocusDiv: React.RefObject<HTMLDivElement>;
+    oldDialog: ModalDialog | undefined;
+    moduleIdCore: string;
+    innerValidate: ((mode: string | undefined) => boolean | undefined) | undefined;
+    innerGetData: ((mode: string | undefined) => object | undefined) | undefined;
+    selfClose: (mode: string | undefined) => void;
+    constructor({ props }: {
+        props: Readonly<ParamsDialog>;
+    });
+    private __innerCloseDom;
+    closeDialog(mode: string | undefined | null): void;
+    private checkGlobal;
+    componentDidMount(): void;
+    get dialog(): HTMLDialogElement | null | undefined;
+    componentWillUnmount(): void;
+    private closeModal;
+    private clickButton;
+    private renderButtons;
+    render(): React.JSX.Element;
+}
 
 declare function ShowBsrDialog(props: ParamsDialog): Promise<ResolvePromise>;
 

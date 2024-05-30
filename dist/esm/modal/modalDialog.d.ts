@@ -5,6 +5,7 @@ export type ResolvePromise = {
     dataBody?: object | undefined;
 };
 export type ParamsDialog = {
+    refDialog?: React.RefObject<InstanceType<typeof ModalDialog>> | null;
     icon?: any;
     header?: any | undefined;
     body?: any | undefined;
@@ -49,14 +50,14 @@ export declare class ModalDialog extends React.Component<ParamsDialog, any> {
     constructor({ props }: {
         props: Readonly<ParamsDialog>;
     });
-    __innerCloseDom(value: ResolvePromise | undefined): void;
-    checkGlobal(): void;
+    private __innerCloseDom;
+    closeDialog(mode: string | undefined | null): void;
+    private checkGlobal;
     componentDidMount(): void;
     get dialog(): HTMLDialogElement | null | undefined;
     componentWillUnmount(): void;
-    closeModal: () => void;
-    clickButton(e: React.MouseEvent<HTMLDivElement> | undefined, mode: string | null | undefined): void;
-    renderButtons(): any;
-    renderBody(): any;
+    private closeModal;
+    private clickButton;
+    private renderButtons;
     render(): React.JSX.Element;
 }

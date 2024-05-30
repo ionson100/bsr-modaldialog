@@ -6,13 +6,14 @@ import {hostDialog} from "./storegeDialog";
 import {v4 as uuidv4} from 'uuid';
 
 
- export type ResolvePromise = {
+export type ResolvePromise = {
     ok: boolean
     mode: string | null | undefined
     dataBody?: object | undefined
 }
 
 export type ParamsDialog = {
+    refDialog?: React.RefObject<InstanceType<typeof ModalDialog>> | null
     icon?: any,
     header?: any | undefined,
     body?: any | undefined,
@@ -107,7 +108,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         this.checkGlobal();
     }
 
-    __innerCloseDom(value: ResolvePromise | undefined) {
+    private __innerCloseDom(value: ResolvePromise | undefined) {
         this.mRefDialog.current?.close()
         const host = document.getElementById(this.props.id!)
         if (host) {
@@ -120,7 +121,11 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
 
     }
 
-    checkGlobal() {
+    closeDialog(mode: string | undefined | null) {
+        this.__innerCloseDom({ok: false, mode: mode, dataBody: undefined})
+    }
+
+    private checkGlobal() {
 
 
         this.oldDialog = hostDialog.currentDialog
@@ -204,12 +209,12 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         this.__innerCloseDom(undefined)
     }
 
-    closeModal = () => {
+    private closeModal = () => {
         this.__innerCloseDom({ok: false, mode: '-1', dataBody: undefined})
 
     }
 
-    clickButton(e: React.MouseEvent<HTMLDivElement> | undefined, mode: string | null | undefined) {
+    private clickButton(e: React.MouseEvent<HTMLDivElement> | undefined, mode: string | null | undefined) {
 
 
         const d: string | null | undefined = mode!.toString();//(e?.target as HTMLElement).getAttribute('data-mode');
@@ -233,7 +238,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
 
     }
 
-    renderButtons(): any {
+    private renderButtons(): any {
         const divs: ReactElement[] = [];
         let add = true;
         this.props.buttons!.forEach((button, index) => {
@@ -258,15 +263,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         return divs
     }
 
-    renderBody(): any {
-        return (
-            <div ref={this.mRefBodyHost}>
-                {
-                    this.props.body
-                }
-            </div>
-        )
-    }
+
 
     render() {
 
@@ -275,7 +272,8 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
             <>
 
                 <dialog className={this.props.className} style={this.props.style} ref={this.mRefDialog}>
-                    <div ref={this.mRefHeaderHost} style={this.props.styleHeader} className={this.props.classNameHeader}>
+                    <div ref={this.mRefHeaderHost} style={this.props.styleHeader}
+                         className={this.props.classNameHeader}>
                         <div style={{width: 'fit-content'}}>{this.props.icon}</div>
                         <div style={{width: '100%'}}>{this.props.header}</div>
                         <IoMdClose className={'icon-close'} onClick={this.closeModal}/>
@@ -288,7 +286,8 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
                         }
                     </div>
                     <div className={this.props.classNameBottomStripe}></div>
-                    <div ref={this.mRefButtonHost} style={this.props.styleFooter} className={this.props.classNameFooter}>
+                    <div ref={this.mRefButtonHost} style={this.props.styleFooter}
+                         className={this.props.classNameFooter}>
                         {
                             this.renderButtons()
                         }

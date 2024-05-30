@@ -11,13 +11,14 @@ export class WrapperModal {
             const uuid = uuidv4();
             const myDiv = document.createElement('div',)
             myDiv.setAttribute("id", uuid);
+            myDiv.setAttribute("data-root-m-dialog", 'true');
             document.body.append(myDiv);
             props.__container = myDiv
             props.id = uuid;
             props._promise = {reject: reject, resolve: resolve}
             const root = ReactDOM.createRoot(myDiv);
             root.render(
-                <ModalDialog  {...props} />
+                <ModalDialog ref={props.refDialog}  {...props} />
             );
 
         })

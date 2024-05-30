@@ -3058,6 +3058,9 @@ var ModalDialog = /** @class */ (function (_super) {
             (_b = this.props._promise) === null || _b === void 0 ? void 0 : _b.resolve(value);
         }
     };
+    ModalDialog.prototype.closeDialog = function (mode) {
+        this.__innerCloseDom({ ok: false, mode: mode, dataBody: undefined });
+    };
     ModalDialog.prototype.checkGlobal = function () {
         this.oldDialog = hostDialog.currentDialog;
         hostDialog.currentDialog = this;
@@ -3177,9 +3180,6 @@ var ModalDialog = /** @class */ (function (_super) {
             // }}>{button}</div>)
         });
         return divs;
-    };
-    ModalDialog.prototype.renderBody = function () {
-        return (React.createElement("div", { ref: this.mRefBodyHost }, this.props.body));
     };
     ModalDialog.prototype.render = function () {
         return (React.createElement(React.Fragment, null,
@@ -34201,12 +34201,13 @@ var WrapperModal = /** @class */ (function () {
                         var uuid = v4();
                         var myDiv = document.createElement('div');
                         myDiv.setAttribute("id", uuid);
+                        myDiv.setAttribute("data-root-m-dialog", 'true');
                         document.body.append(myDiv);
                         props.__container = myDiv;
                         props.id = uuid;
                         props._promise = { reject: reject, resolve: resolve };
                         var root = client.createRoot(myDiv);
-                        root.render(React.createElement(ModalDialog, __assign({}, props)));
+                        root.render(React.createElement(ModalDialog, __assign({ ref: props.refDialog }, props)));
                     })];
             });
         });

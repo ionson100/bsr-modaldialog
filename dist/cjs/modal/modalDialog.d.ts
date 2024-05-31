@@ -119,7 +119,7 @@ export declare class ModalDialog extends React.Component<ParamsDialog, any> {
     get dialog(): HTMLDialogElement | null | undefined;
     componentWillUnmount(): void;
     closeModal: () => void;
-    clickButton(e: React.MouseEvent<HTMLDivElement> | undefined, mode: string | null | undefined): void;
+    clickButton(mode: string | null | undefined): void;
     renderButtons(): any;
     render(): React.JSX.Element;
     private clickDialog;

@@ -302,22 +302,22 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
 
         const d: string | null | undefined = mode!.toString();//(e?.target as HTMLElement).getAttribute('data-mode');
 
-        // if (d === "-1"&&!this.innerValidate) {
-        //     this.closeModal();
-        //     return;
-        // }
+        let dataBody:object|undefined=undefined;
         if (this.innerValidate) {
             const res = this.innerValidate(d!)
             if (res !== true) return
         }
         if (this.innerGetData) {
-            const data = this.innerGetData(d!);
-            this.__innerCloseDom({ok: true, mode: d, dataBody: data})
-            return;
+            dataBody = this.innerGetData(d!);
+        }
+
+        let res:boolean=true;
+        if(d==='-1'||d==='-2'){
+            res=false;
         }
 
 
-        this.__innerCloseDom({ok: true, mode: d, dataBody: undefined})
+        this.__innerCloseDom({ok: res, mode: d, dataBody: dataBody})
 
     }
 

@@ -3138,21 +3138,20 @@ var ModalDialog = /** @class */ (function (_super) {
     };
     ModalDialog.prototype.clickButton = function (mode) {
         var d = mode.toString(); //(e?.target as HTMLElement).getAttribute('data-mode');
-        // if (d === "-1"&&!this.innerValidate) {
-        //     this.closeModal();
-        //     return;
-        // }
+        var dataBody = undefined;
         if (this.innerValidate) {
-            var res = this.innerValidate(d);
-            if (res !== true)
+            var res_1 = this.innerValidate(d);
+            if (res_1 !== true)
                 return;
         }
         if (this.innerGetData) {
-            var data = this.innerGetData(d);
-            this.__innerCloseDom({ ok: true, mode: d, dataBody: data });
-            return;
+            dataBody = this.innerGetData(d);
         }
-        this.__innerCloseDom({ ok: true, mode: d, dataBody: undefined });
+        var res = true;
+        if (d === '-1' || d === '-2') {
+            res = false;
+        }
+        this.__innerCloseDom({ ok: res, mode: d, dataBody: dataBody });
     };
     ModalDialog.prototype.renderButtons = function () {
         var _this = this;
@@ -34253,9 +34252,9 @@ var BaseBodyDialog = /** @class */ (function (_super) {
         }, 1);
         return _this;
     }
-    BaseBodyDialog.prototype.selfClose = function (modeId) {
+    BaseBodyDialog.prototype.selfClose = function (mode) {
         if (this.selfCloseCore) {
-            this.selfCloseCore(modeId);
+            this.selfCloseCore(mode);
         }
     };
     return BaseBodyDialog;

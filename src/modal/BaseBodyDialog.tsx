@@ -22,9 +22,9 @@ export abstract class BaseBodyDialog extends React.Component<any, any> {
     }
 
 
-    selfClose(modeId?:string) {
+    selfClose(mode?:string) {
       if(this.selfCloseCore){
-          this.selfCloseCore(modeId)
+          this.selfCloseCore(mode)
       }
     }
 

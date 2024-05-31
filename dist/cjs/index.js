@@ -3140,10 +3140,10 @@ var ModalDialog = /** @class */ (function (_super) {
     };
     ModalDialog.prototype.clickButton = function (e, mode) {
         var d = mode.toString(); //(e?.target as HTMLElement).getAttribute('data-mode');
-        if (d === "-1") {
-            this.closeModal();
-            return;
-        }
+        // if (d === "-1"&&!this.innerValidate) {
+        //     this.closeModal();
+        //     return;
+        // }
         if (this.innerValidate) {
             var res = this.innerValidate(d);
             if (res !== true)

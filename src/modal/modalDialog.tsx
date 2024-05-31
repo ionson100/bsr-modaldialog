@@ -1,4 +1,4 @@
-import React, {MouseEventHandler, ReactElement} from "react";
+import React, {ReactElement} from "react";
 
 ///import "./index.css"
 import {IoMdClose} from "react-icons/io";
@@ -302,10 +302,10 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
 
         const d: string | null | undefined = mode!.toString();//(e?.target as HTMLElement).getAttribute('data-mode');
 
-        if (d === "-1") {
-            this.closeModal();
-            return;
-        }
+        // if (d === "-1"&&!this.innerValidate) {
+        //     this.closeModal();
+        //     return;
+        // }
         if (this.innerValidate) {
             const res = this.innerValidate(d!)
             if (res !== true) return

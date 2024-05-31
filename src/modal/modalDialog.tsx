@@ -225,7 +225,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
 
         if (this.props.modal === true) {
             this.mRefDialog.current?.showModal()
-            this.dialog!.oncancel = (ev) => {
+            this.dialog!.oncancel = () => {
                 if (this.innerValidate) {
                     const res = this.innerValidate("-2");
                     if (res === true) {
@@ -243,7 +243,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         } else {
             this.mRefDialog.current?.show()
         }
-        this.dialog!.onclose = (ev) => {
+        this.dialog!.onclose = () => {
             if (this.props.onClose) {
                 this.props.onClose(this.dialog!)
             }
@@ -293,11 +293,11 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
     }
 
     closeModal = () => {
-        this.__innerCloseDom({ok: false, mode: '-1', dataBody: undefined})
+        this.clickButton("-1")
 
     }
 
-    clickButton(e: React.MouseEvent<HTMLDivElement> | undefined, mode: string | null | undefined) {
+    clickButton( mode: string | null | undefined) {
 
 
         const d: string | null | undefined = mode!.toString();//(e?.target as HTMLElement).getAttribute('data-mode');
@@ -329,13 +329,13 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
             const focus = button.props['data-focus']
             if (focus && add) {
 
-                divs.push(<div ref={this.mRefFocusDiv} key={index} onClick={(e) => {
-                    this.clickButton(e, dataMode)
+                divs.push(<div ref={this.mRefFocusDiv} key={index} onClick={() => {
+                    this.clickButton( dataMode)
                 }}>{button}</div>)
                 add = false;
             } else {
-                divs.push(<div key={index} onClick={(e) => {
-                    this.clickButton(e, dataMode)
+                divs.push(<div key={index} onClick={() => {
+                    this.clickButton(dataMode)
                 }}>{button}</div>)
             }
             //

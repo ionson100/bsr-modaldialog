@@ -3026,7 +3026,7 @@ var ModalDialog = /** @class */ (function (_super) {
             }
         };
         _this.closeModal = function () {
-            _this.__innerCloseDom({ ok: false, mode: '-1', dataBody: undefined });
+            _this.clickButton("-1");
         };
         _this.promiseInfo = {};
         _this.state = {
@@ -3074,7 +3074,7 @@ var ModalDialog = /** @class */ (function (_super) {
         var _a, _b, _c, _d;
         if (this.props.modal === true) {
             (_a = this.mRefDialog.current) === null || _a === void 0 ? void 0 : _a.showModal();
-            this.dialog.oncancel = function (ev) {
+            this.dialog.oncancel = function () {
                 if (_this.innerValidate) {
                     var res = _this.innerValidate("-2");
                     if (res === true) {
@@ -3093,7 +3093,7 @@ var ModalDialog = /** @class */ (function (_super) {
         else {
             (_b = this.mRefDialog.current) === null || _b === void 0 ? void 0 : _b.show();
         }
-        this.dialog.onclose = function (ev) {
+        this.dialog.onclose = function () {
             if (_this.props.onClose) {
                 _this.props.onClose(_this.dialog);
             }
@@ -3136,7 +3136,7 @@ var ModalDialog = /** @class */ (function (_super) {
         }
         this.__innerCloseDom(undefined);
     };
-    ModalDialog.prototype.clickButton = function (e, mode) {
+    ModalDialog.prototype.clickButton = function (mode) {
         var d = mode.toString(); //(e?.target as HTMLElement).getAttribute('data-mode');
         // if (d === "-1"&&!this.innerValidate) {
         //     this.closeModal();
@@ -3162,14 +3162,14 @@ var ModalDialog = /** @class */ (function (_super) {
             var dataMode = button.props['data-mode'];
             var focus = button.props['data-focus'];
             if (focus && add) {
-                divs.push(React.createElement("div", { ref: _this.mRefFocusDiv, key: index, onClick: function (e) {
-                        _this.clickButton(e, dataMode);
+                divs.push(React.createElement("div", { ref: _this.mRefFocusDiv, key: index, onClick: function () {
+                        _this.clickButton(dataMode);
                     } }, button));
                 add = false;
             }
             else {
-                divs.push(React.createElement("div", { key: index, onClick: function (e) {
-                        _this.clickButton(e, dataMode);
+                divs.push(React.createElement("div", { key: index, onClick: function () {
+                        _this.clickButton(dataMode);
                     } }, button));
             }
             //

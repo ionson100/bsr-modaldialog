@@ -160,12 +160,11 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
     public innerValidate: ((mode: string | undefined) => boolean | undefined) | undefined
     public innerGetData: ((mode: string | undefined) => object | undefined) | undefined
     public selfClose: (mode: string | undefined) => void = (mode) => {
-        const host = document.getElementById(this.props._id!)
-        if (host) {
-            const modeCore = mode ? mode : "no data"
-            this.props._promise?.resolve({ok: true, mode: modeCore, dataBody: this.innerGetData!(mode!)});
-            document.body.removeChild<Node>(host!);
-        }
+
+        const modeCore = mode ? mode : "no data"
+        this.props._promise?.resolve({ok: true, mode: modeCore, dataBody: this.innerGetData!(mode!)});
+        document.body.removeChild<Node>(this.props.__container as Node);
+
     };
 
 
@@ -193,38 +192,32 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
     __innerCloseDom(value: ResolvePromise | undefined) {
 
         this.mRefDialog.current?.close()
-        const host = document.getElementById(this.props._id!)
-        if (host) {
-            document.body.removeChild<Node>(host);
-        }
 
+        document.body.removeChild<Node>(this.props.__container as Node);
         if (value) {
             this.props._promise?.resolve(value);
         }
 
     }
+
     __innerCloseDomError(value: unknown) {
 
 
-        let error='inner error, watch console'
-        if(value){
-            error=(value as ErrorEvent)?.message;
+        let error = 'inner error, watch console'
+        if (value) {
+            error = (value as ErrorEvent)?.message;
         }
 
         this.props._promise?.reject(new Error(error));
 
-        if(this.props._promise){
+        if (this.props._promise) {
             console.log(error)
             this.props._promise.reject(new Error(error));
         }
 
         this.mRefDialog.current?.close()
-        const host = document.getElementById(this.props._id!)
-        if (host) {
-            document.body.removeChild<Node>(host);
-        }
 
-
+        document.body.removeChild<Node>(this.props.__container as Node);
 
 
     }
@@ -320,14 +313,14 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
 
     }
 
-    clickButton( mode: string | null | undefined) {
+    clickButton(mode: string | null | undefined) {
 
 
         try {
 
             const d: string | null | undefined = mode?.toString();
 
-            let dataBody:object|undefined=undefined;
+            let dataBody: object | undefined = undefined;
             if (this.innerValidate) {
                 const res = this.innerValidate(d)
                 if (res !== true) return
@@ -336,15 +329,15 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
                 dataBody = this.innerGetData(d);
             }
 
-            let res:boolean=true;
-            if(d==='-1'||d==='-2'){
-                res=false;
+            let res: boolean = true;
+            if (d === '-1' || d === '-2') {
+                res = false;
             }
 
 
             this.__innerCloseDom({ok: res, mode: d, dataBody: dataBody})
 
-        }catch (e){
+        } catch (e) {
             this.__innerCloseDomError(e)
             throw e;
         }
@@ -359,7 +352,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
             if (focus && add) {
 
                 divs.push(<div ref={this.mRefFocusDiv} key={index} onClick={() => {
-                    this.clickButton( dataMode)
+                    this.clickButton(dataMode)
                 }}>{button}</div>)
                 add = false;
             } else {

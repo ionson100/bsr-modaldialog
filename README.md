@@ -37,3 +37,7 @@ export default function P4_1(){
 ## License
 
 MIT © [ionson100](https://github.com/ionson100)
+
+[Props, Function](https://ionson100.github.io/wwwroot/index.html#mode=bsrdialog&page=bsrdialog&state=true).
+
+[Examples, Help pages](https://ionson100.github.io/wwwroot/index.html#mode=bsrdialog&page=4-1).

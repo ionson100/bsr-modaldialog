@@ -115,6 +115,7 @@ declare class ModalDialog extends React.Component<ParamsDialog, any> {
     });
     __innerCloseDom(value: ResolvePromise | undefined): void;
     __innerCloseDomError(value: unknown): void;
+    closeDialog(mode: string | undefined | null): void;
     checkGlobal(): void;
     componentDidMount(): void;
     get dialog(): HTMLDialogElement | null | undefined;

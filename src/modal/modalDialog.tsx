@@ -229,9 +229,9 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
 
     }
 
-    // closeDialog(mode: string | undefined | null) {
-    //     this.__innerCloseDom({ok: false, mode: mode, dataBody: undefined})
-    // }
+    closeDialog(mode: string | undefined | null) {
+        this.__innerCloseDom({ok: false, mode: mode, dataBody: undefined})
+    }
 
     checkGlobal() {
 

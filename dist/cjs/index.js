@@ -3075,9 +3075,9 @@ var ModalDialog = /** @class */ (function (_super) {
             document.body.removeChild(host);
         }
     };
-    // closeDialog(mode: string | undefined | null) {
-    //     this.__innerCloseDom({ok: false, mode: mode, dataBody: undefined})
-    // }
+    ModalDialog.prototype.closeDialog = function (mode) {
+        this.__innerCloseDom({ ok: false, mode: mode, dataBody: undefined });
+    };
     ModalDialog.prototype.checkGlobal = function () {
         this.oldDialog = hostDialog.currentDialog;
         hostDialog.currentDialog = this;

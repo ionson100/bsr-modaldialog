@@ -1,7 +1,7 @@
 {
   "name": "bsr-modaldialog",
-  "version": "2.2.4",
-  "description": "async dialog",
+  "version": "2.2.5",
+  "description": " react async dialog",
   "author": "ionson100",
   "license": "MIT",
   "keywords": ["async dialog","dialog","modal dialog"],

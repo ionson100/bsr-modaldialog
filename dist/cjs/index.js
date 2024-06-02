@@ -3058,17 +3058,31 @@ var ModalDialog = /** @class */ (function (_super) {
             (_b = this.props._promise) === null || _b === void 0 ? void 0 : _b.resolve(value);
         }
     };
-    ModalDialog.prototype.closeDialog = function (mode) {
-        this.__innerCloseDom({ ok: false, mode: mode, dataBody: undefined });
+    ModalDialog.prototype.__innerCloseDomError = function (value) {
+        var _a, _b;
+        var error = 'inner error, watch console';
+        if (value) {
+            error = value === null || value === void 0 ? void 0 : value.message;
+        }
+        (_a = this.props._promise) === null || _a === void 0 ? void 0 : _a.reject(new Error(error));
+        if (this.props._promise) {
+            console.log(error);
+            this.props._promise.reject(new Error(error));
+        }
+        (_b = this.mRefDialog.current) === null || _b === void 0 ? void 0 : _b.close();
+        var host = document.getElementById(this.props._id);
+        if (host) {
+            document.body.removeChild(host);
+        }
     };
+    // closeDialog(mode: string | undefined | null) {
+    //     this.__innerCloseDom({ok: false, mode: mode, dataBody: undefined})
+    // }
     ModalDialog.prototype.checkGlobal = function () {
         this.oldDialog = hostDialog.currentDialog;
         hostDialog.currentDialog = this;
-        //console.log("old", this.oldDialog)
-        // console.log("current", hostDialog.currentDialog)
         if (!hostDialog.moduleId) {
             hostDialog.moduleId = this.moduleIdCore;
-            //  console.log("init", hostDialog.moduleId, "  ", this.moduleIdCore)
         }
     };
     ModalDialog.prototype.componentDidMount = function () {
@@ -3139,21 +3153,27 @@ var ModalDialog = /** @class */ (function (_super) {
         this.__innerCloseDom(undefined);
     };
     ModalDialog.prototype.clickButton = function (mode) {
-        var d = mode.toString(); //(e?.target as HTMLElement).getAttribute('data-mode');
-        var dataBody = undefined;
-        if (this.innerValidate) {
-            var res_1 = this.innerValidate(d);
-            if (res_1 !== true)
-                return;
+        try {
+            var d = mode === null || mode === void 0 ? void 0 : mode.toString();
+            var dataBody = undefined;
+            if (this.innerValidate) {
+                var res_1 = this.innerValidate(d);
+                if (res_1 !== true)
+                    return;
+            }
+            if (this.innerGetData) {
+                dataBody = this.innerGetData(d);
+            }
+            var res = true;
+            if (d === '-1' || d === '-2') {
+                res = false;
+            }
+            this.__innerCloseDom({ ok: res, mode: d, dataBody: dataBody });
         }
-        if (this.innerGetData) {
-            dataBody = this.innerGetData(d);
+        catch (e) {
+            this.__innerCloseDomError(e);
+            throw e;
         }
-        var res = true;
-        if (d === '-1' || d === '-2') {
-            res = false;
-        }
-        this.__innerCloseDom({ ok: res, mode: d, dataBody: dataBody });
     };
     ModalDialog.prototype.renderButtons = function () {
         var _this = this;

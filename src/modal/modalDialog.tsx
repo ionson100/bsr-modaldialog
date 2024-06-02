@@ -191,6 +191,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
     }
 
     __innerCloseDom(value: ResolvePromise | undefined) {
+
         this.mRefDialog.current?.close()
         const host = document.getElementById(this.props._id!)
         if (host) {
@@ -202,10 +203,35 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         }
 
     }
+    __innerCloseDomError(value: unknown) {
 
-    closeDialog(mode: string | undefined | null) {
-        this.__innerCloseDom({ok: false, mode: mode, dataBody: undefined})
+
+        let error='inner error, watch console'
+        if(value){
+            error=(value as ErrorEvent)?.message;
+        }
+
+        this.props._promise?.reject(new Error(error));
+
+        if(this.props._promise){
+            console.log(error)
+            this.props._promise.reject(new Error(error));
+        }
+
+        this.mRefDialog.current?.close()
+        const host = document.getElementById(this.props._id!)
+        if (host) {
+            document.body.removeChild<Node>(host);
+        }
+
+
+
+
     }
+
+    // closeDialog(mode: string | undefined | null) {
+    //     this.__innerCloseDom({ok: false, mode: mode, dataBody: undefined})
+    // }
 
     checkGlobal() {
 
@@ -297,25 +323,31 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
     clickButton( mode: string | null | undefined) {
 
 
-        const d: string | null | undefined = mode!.toString();//(e?.target as HTMLElement).getAttribute('data-mode');
+        try {
 
-        let dataBody:object|undefined=undefined;
-        if (this.innerValidate) {
-            const res = this.innerValidate(d!)
-            if (res !== true) return
+            const d: string | null | undefined = mode?.toString();
+
+            let dataBody:object|undefined=undefined;
+            if (this.innerValidate) {
+                const res = this.innerValidate(d)
+                if (res !== true) return
+            }
+            if (this.innerGetData) {
+                dataBody = this.innerGetData(d);
+            }
+
+            let res:boolean=true;
+            if(d==='-1'||d==='-2'){
+                res=false;
+            }
+
+
+            this.__innerCloseDom({ok: res, mode: d, dataBody: dataBody})
+
+        }catch (e){
+            this.__innerCloseDomError(e)
+            throw e;
         }
-        if (this.innerGetData) {
-            dataBody = this.innerGetData(d!);
-        }
-
-        let res:boolean=true;
-        if(d==='-1'||d==='-2'){
-            res=false;
-        }
-
-
-        this.__innerCloseDom({ok: res, mode: d, dataBody: dataBody})
-
     }
 
     renderButtons(): any {

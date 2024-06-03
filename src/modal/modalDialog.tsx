@@ -115,6 +115,7 @@ export type ParamsDialog = {
     _promise?: {
         resolve: (value: ResolvePromise) => void, reject: (reason?: any) => void
     },
+    __actionUnmount?: () => void
     className?: string;
     classNameHeader?: string;
     classNameBody?: string;
@@ -159,11 +160,13 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
     public moduleIdCore: string;
     public innerValidate: ((mode: string | undefined) => boolean | undefined) | undefined
     public innerGetData: ((mode: string | undefined) => object | undefined) | undefined
+
+
     public selfClose: (mode: string | undefined) => void = (mode) => {
 
         const modeCore = mode ? mode : "no data"
         this.props._promise?.resolve({ok: true, mode: modeCore, dataBody: this.innerGetData!(mode!)});
-        document.body.removeChild<Node>(this.props.__container as Node);
+        this.props.__actionUnmount?.call(undefined)
 
     };
 
@@ -193,11 +196,11 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
 
         this.mRefDialog.current?.close()
 
-        document.body.removeChild<Node>(this.props.__container as Node);
+        //document.body.removeChild<Node>(this.props.__container as Node);
         if (value) {
             this.props._promise?.resolve(value);
         }
-
+        this.props.__actionUnmount?.call(undefined)
     }
 
     __innerCloseDomError(value: unknown) {
@@ -216,8 +219,9 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         }
 
         this.mRefDialog.current?.close()
+        this.props.__actionUnmount?.call(undefined)
 
-        document.body.removeChild<Node>(this.props.__container as Node);
+
 
 
     }
@@ -299,13 +303,15 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
 
 
     componentWillUnmount() {
+        console.log("unmount")
         if (hostDialog.moduleId === this.moduleIdCore) {
             hostDialog.currentDialog = undefined;
             hostDialog.moduleId = undefined;
         } else {
             hostDialog.currentDialog = this.oldDialog;
         }
-        this.__innerCloseDom(undefined)
+        document.body.removeChild<Node>(this.props.__container as Node);
+        // this.__innerCloseDom(undefined)
     }
 
     closeModal = () => {

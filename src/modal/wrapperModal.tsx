@@ -17,10 +17,13 @@ export class WrapperModal {
             props._id = uuid;
             props._promise = {reject: reject, resolve: resolve}
             const root = ReactDOM.createRoot(myDiv);
+
+            props.__actionUnmount=()=>{
+                root.unmount()
+            }
             root.render(
                 <ModalDialog ref={props.refDialog}  {...props} />
             );
-
         })
     }
 }

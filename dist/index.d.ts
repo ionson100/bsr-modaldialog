@@ -89,6 +89,7 @@ type ParamsDialog = {
         resolve: (value: ResolvePromise) => void;
         reject: (reason?: any) => void;
     };
+    __actionUnmount?: () => void;
     className?: string;
     classNameHeader?: string;
     classNameBody?: string;

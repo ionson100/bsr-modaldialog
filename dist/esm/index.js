@@ -3017,13 +3017,10 @@ var ModalDialog = /** @class */ (function (_super) {
         var props = _a.props;
         var _this = _super.call(this, props) || this;
         _this.selfClose = function (mode) {
-            var _a;
-            var host = document.getElementById(_this.props._id);
-            if (host) {
-                var modeCore = mode ? mode : "no data";
-                (_a = _this.props._promise) === null || _a === void 0 ? void 0 : _a.resolve({ ok: true, mode: modeCore, dataBody: _this.innerGetData(mode) });
-                document.body.removeChild(host);
-            }
+            var _a, _b;
+            var modeCore = mode ? mode : "no data";
+            (_a = _this.props._promise) === null || _a === void 0 ? void 0 : _a.resolve({ ok: true, mode: modeCore, dataBody: _this.innerGetData(mode) });
+            (_b = _this.props.__actionUnmount) === null || _b === void 0 ? void 0 : _b.call(undefined);
         };
         _this.closeModal = function () {
             _this.clickButton("-1");
@@ -3046,18 +3043,16 @@ var ModalDialog = /** @class */ (function (_super) {
         return _this;
     }
     ModalDialog.prototype.__innerCloseDom = function (value) {
-        var _a, _b;
+        var _a, _b, _c;
         (_a = this.mRefDialog.current) === null || _a === void 0 ? void 0 : _a.close();
-        var host = document.getElementById(this.props._id);
-        if (host) {
-            document.body.removeChild(host);
-        }
+        //document.body.removeChild<Node>(this.props.__container as Node);
         if (value) {
             (_b = this.props._promise) === null || _b === void 0 ? void 0 : _b.resolve(value);
         }
+        (_c = this.props.__actionUnmount) === null || _c === void 0 ? void 0 : _c.call(undefined);
     };
     ModalDialog.prototype.__innerCloseDomError = function (value) {
-        var _a, _b;
+        var _a, _b, _c;
         var error = 'inner error, watch console';
         if (value) {
             error = value === null || value === void 0 ? void 0 : value.message;
@@ -3068,10 +3063,7 @@ var ModalDialog = /** @class */ (function (_super) {
             this.props._promise.reject(new Error(error));
         }
         (_b = this.mRefDialog.current) === null || _b === void 0 ? void 0 : _b.close();
-        var host = document.getElementById(this.props._id);
-        if (host) {
-            document.body.removeChild(host);
-        }
+        (_c = this.props.__actionUnmount) === null || _c === void 0 ? void 0 : _c.call(undefined);
     };
     ModalDialog.prototype.closeDialog = function (mode) {
         this.__innerCloseDom({ ok: false, mode: mode, dataBody: undefined });
@@ -3141,6 +3133,7 @@ var ModalDialog = /** @class */ (function (_super) {
         configurable: true
     });
     ModalDialog.prototype.componentWillUnmount = function () {
+        console.log("unmount");
         if (hostDialog.moduleId === this.moduleIdCore) {
             hostDialog.currentDialog = undefined;
             hostDialog.moduleId = undefined;
@@ -3148,7 +3141,8 @@ var ModalDialog = /** @class */ (function (_super) {
         else {
             hostDialog.currentDialog = this.oldDialog;
         }
-        this.__innerCloseDom(undefined);
+        document.body.removeChild(this.props.__container);
+        // this.__innerCloseDom(undefined)
     };
     ModalDialog.prototype.clickButton = function (mode) {
         try {
@@ -34235,6 +34229,9 @@ var WrapperModal = /** @class */ (function () {
                         props._id = uuid;
                         props._promise = { reject: reject, resolve: resolve };
                         var root = client.createRoot(myDiv);
+                        props.__actionUnmount = function () {
+                            root.unmount();
+                        };
                         root.render(React.createElement(ModalDialog, __assign({ ref: props.refDialog }, props)));
                     })];
             });

@@ -483,7 +483,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         return (
             <>
 
-                <div ref={this.mRefAssDiv} className={this.props.classNameAssDialog} onClick={this.ClickDialog}></div>
+                <div ref={this.mRefAssDiv} className={this.props.classNameAssDialog} onClick={this.ClickDialog}>
                 <div
 
                     aria-label={this.props.ariaLabel}
@@ -519,6 +519,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
                     </div>
 
 
+                </div>
                 </div>
             </>
 

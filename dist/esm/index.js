@@ -3010,6 +3010,18 @@ function v4(options, buf, offset) {
   return unsafeStringify(rnds);
 }
 
+function findHighestZIndex(elem) {
+    var elems = document.getElementsByTagName(elem);
+    var highest = Number.MIN_SAFE_INTEGER || -(Math.pow(2, 53) - 1);
+    for (var i = 0; i < elems.length; i++) {
+        var index = Number.parseInt(document.defaultView.getComputedStyle(elems[i], null).getPropertyValue("z-index"), 10);
+        if (index > highest) {
+            highest = index;
+        }
+    }
+    return highest;
+}
+
 var ModalDialog = /** @class */ (function (_super) {
     __extends(ModalDialog, _super);
     function ModalDialog(_a) {
@@ -3195,6 +3207,9 @@ var ModalDialog = /** @class */ (function (_super) {
                 _this.__innerCloseDom({ ok: false, mode: "-1", dataBody: undefined });
             }, this.props.timeOut);
         }
+        var zet = findHighestZIndex('div');
+        this.mRefAssDiv.current.style.zIndex = "" + (zet + 1);
+        this.mRefDialog.current.style.zIndex = "" + (zet + 2);
     };
     Object.defineProperty(ModalDialog.prototype, "dialog", {
         get: function () {

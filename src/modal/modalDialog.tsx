@@ -4,6 +4,7 @@ import React, {ReactElement} from "react";
 import {IoMdClose} from "react-icons/io";
 import {hostDialog} from "./storegeDialog";
 import {v4 as uuidv4} from 'uuid';
+import {findHighestZIndex} from "./maxZIndex";
 
 
 export type ResolvePromise = {
@@ -385,6 +386,10 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
                 this.__innerCloseDom({ok: false, mode: "-1", dataBody: undefined})
             }, this.props.timeOut)
         }
+
+        const zet:number=findHighestZIndex('div');
+        this.mRefAssDiv.current!.style.zIndex=""+(zet+1)
+        this.mRefDialog.current!.style.zIndex=""+(zet+2)
 
     }
 

@@ -3271,16 +3271,16 @@ var ModalDialog = /** @class */ (function (_super) {
     };
     ModalDialog.prototype.render = function () {
         return (React.createElement(React.Fragment, null,
-            React.createElement("div", { ref: this.mRefAssDiv, className: this.props.classNameAssDialog, onClick: this.ClickDialog },
-                React.createElement("div", { "aria-label": this.props.ariaLabel, "aria-labelledby": this.props.ariaLabelledby, role: 'dialog', className: this.props.className, style: this.props.style, ref: this.mRefDialog },
-                    React.createElement("div", { className: 'wrapper-inner-dialog' },
-                        React.createElement("div", { ref: this.mRefHeaderHost, style: this.props.styleHeader, className: this.props.classNameHeader },
-                            React.createElement("div", { style: { width: 'fit-content' } }, this.props.icon),
-                            React.createElement("div", { style: { width: '100%' } }, this.props.header),
-                            React.createElement("button", { className: 'btn-close-modal', "aria-label": 'Close', onClick: this.closeModal },
-                                React.createElement(IoMdClose, null))),
-                        React.createElement("div", { ref: this.mRefBodyHost, style: this.props.styleBody, className: this.props.classNameBody }, this.props.body),
-                        React.createElement("div", { ref: this.mRefButtonHost, style: this.props.styleFooter, className: this.props.classNameFooter }, this.renderButtons()))))));
+            React.createElement("div", { ref: this.mRefAssDiv, className: this.props.classNameAssDialog, onClick: this.ClickDialog }),
+            React.createElement("div", { "aria-label": this.props.ariaLabel, "aria-labelledby": this.props.ariaLabelledby, role: 'dialog', className: this.props.className, style: this.props.style, ref: this.mRefDialog },
+                React.createElement("div", { className: 'wrapper-inner-dialog' },
+                    React.createElement("div", { ref: this.mRefHeaderHost, style: this.props.styleHeader, className: this.props.classNameHeader },
+                        React.createElement("div", { style: { width: 'fit-content' } }, this.props.icon),
+                        React.createElement("div", { style: { width: '100%' } }, this.props.header),
+                        React.createElement("button", { className: 'btn-close-modal', "aria-label": 'Close', onClick: this.closeModal },
+                            React.createElement(IoMdClose, null))),
+                    React.createElement("div", { ref: this.mRefBodyHost, style: this.props.styleBody, className: this.props.classNameBody }, this.props.body),
+                    React.createElement("div", { ref: this.mRefButtonHost, style: this.props.styleFooter, className: this.props.classNameFooter }, this.renderButtons())))));
     };
     ModalDialog.prototype.ClickDialog = function () {
         var _a;

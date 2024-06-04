@@ -1,4 +1,13 @@
+.ass-dialog{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #b8cdd5;
+    opacity: 0.2;
 
+}
 
 .main-dialog {
     display: block;
@@ -10,6 +19,7 @@
     bottom: 0;
     left: 0;
     padding: 0;
+
 
 
     width: 500px;
@@ -51,8 +61,9 @@
 }
 
 .m-body {
-
+    border-top: 1px solid #eeecec;
     /*height: 90%;*/
+    border-bottom:1px solid #eeecec;
 }
 
 .m-footer {
@@ -66,14 +77,20 @@
 
 }
 
-.top-stripe {
-    height: 1px;
-    background: #e8e8e8;
+.btn-close-modal {
+    box-sizing: content-box;
+    width: 1em;
+    height: 1em;
+    padding: .25em .25em;
+    color: #000;
+    border: 0;
+    border-radius: .25rem;
+    opacity: .5;
+}
+.btn-close-modal:hover{
+    opacity: 0.8;
 }
 
-.bottom-stripe {
-    height: 1px;
-    background: #e8e8e8;
-}
+
 
 

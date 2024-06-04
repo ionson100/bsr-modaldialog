@@ -77,22 +77,22 @@ export type ParamsDialog = {
 
     /**
      * The event occurs before the modal dialog is closed using the Esc button
-     * @param dialog HTMLDialogElement
+     * @param dialog HTMLDivElement
      */
-    onCancel?: (dialog: InstanceType<typeof HTMLDialogElement> | undefined) => boolean;
+    onCancel?: (dialog: InstanceType<typeof HTMLDivElement> | undefined) => boolean;
 
     /***
      * Event when closing a dialog
-     * @param dialog HTMLDialogElement
+     * @param dialog  HTMLDivElement
      */
-    onClose?: (dialog: InstanceType<typeof HTMLDialogElement> | undefined) => void;
+    onClose?: (dialog: InstanceType<typeof HTMLDivElement> | undefined) => void;
 
 
     /**
      * Event when opening a dialog
-     * @param dialog HTMLDialogElement
+     * @param dialog  HTMLDivElement
      */
-    onShow?: (dialog: InstanceType<typeof HTMLDialogElement> | undefined) => void;
+    onShow?: (dialog: InstanceType<typeof HTMLDivElement> | undefined) => void;
 
     /**
      * Time in milliseconds until the dialog is automatically closed if the dialog is used as an alert
@@ -120,8 +120,10 @@ export type ParamsDialog = {
     classNameHeader?: string;
     classNameBody?: string;
     classNameFooter?: string;
-    classNameTopStripe?: string;
-    classNameBottomStripe?: string;
+
+
+    ariaLabel?: string;
+    ariaLabelledby?: string
 
 }
 
@@ -139,27 +141,33 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         classNameBody: "m-body",
         classNameFooter: "m-footer",
         classNameHeader: "m-header",
-        classNameTopStripe: "top-stripe",
-        classNameBottomStripe: "bottom-stripe"
+
 
     }
 
     public body: any | undefined;
     public promiseInfo: object
 
-    public mRefDialog: React.RefObject<HTMLDialogElement>
+    public mRefDialog: React.RefObject<HTMLDivElement>
+    private focusable: {
+        firstFocusableEl: HTMLElement | undefined,
+        lastFocusableEl: HTMLElement | undefined
+    }
+    public formClose:HTMLFormElement|undefined
 
 
     public mRefButtonHost: React.RefObject<HTMLDivElement>
     public mRefHeaderHost: React.RefObject<HTMLDivElement>
     public mRefBodyHost: React.RefObject<HTMLDivElement>
     public mRefFocusDiv: React.RefObject<HTMLDivElement>
+    public mRefAssDiv: React.RefObject<HTMLDivElement>
 
 
     public oldDialog: ModalDialog | undefined
     public moduleIdCore: string;
     public innerValidate: ((mode: string | undefined) => boolean | undefined) | undefined
     public innerGetData: ((mode: string | undefined) => object | undefined) | undefined
+    public lastFocus: Element | null;
 
 
     public selfClose: (mode: string | undefined) => void = (mode) => {
@@ -173,6 +181,10 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
 
     constructor({props}: { props: Readonly<ParamsDialog> }) {
         super(props);
+        this.focusable = {
+            lastFocusableEl: undefined,
+            firstFocusableEl: undefined
+        }
 
         this.promiseInfo = {};
         this.state = {
@@ -183,18 +195,24 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         this.innerValidate = undefined
         this.innerGetData = undefined;
         this.mRefHeaderHost = React.createRef<HTMLDivElement>();
-        this.mRefDialog = React.createRef<HTMLDialogElement>();
+        this.mRefDialog = React.createRef<HTMLDivElement>();
         this.mRefButtonHost = React.createRef<HTMLDivElement>();
         this.mRefBodyHost = React.createRef<HTMLDivElement>();
         this.mRefFocusDiv = React.createRef<HTMLDivElement>();
+        this.mRefAssDiv = React.createRef<HTMLDivElement>()
 
         this.clickButton = this.clickButton.bind(this)
+        this.KeuUpEsc = this.KeuUpEsc.bind(this)
+        this.FocusTab = this.FocusTab.bind(this)
+        this.ClickDialog=this.ClickDialog.bind(this)
+        this.lastFocus = document.activeElement
+        this.formClose=undefined;
         this.checkGlobal();
+
     }
 
     __innerCloseDom(value: ResolvePromise | undefined) {
 
-        this.mRefDialog.current?.close()
 
         //document.body.removeChild<Node>(this.props.__container as Node);
         if (value) {
@@ -214,14 +232,13 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         this.props._promise?.reject(new Error(error));
 
         if (this.props._promise) {
-            console.log(error)
+
             this.props._promise.reject(new Error(error));
         }
+        console.error(error)
 
-        this.mRefDialog.current?.close()
+
         this.props.__actionUnmount?.call(undefined)
-
-
 
 
     }
@@ -236,32 +253,103 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         this.oldDialog = hostDialog.currentDialog
 
         hostDialog.currentDialog = this;
-        if (!hostDialog.moduleId) {
-            hostDialog.moduleId = this.moduleIdCore;
+        // if (!hostDialog.moduleId) {
+        //     hostDialog.moduleId = this.moduleIdCore;
+        // }
+    }
+
+    private FocusTab(e: KeyboardEvent) {
+        if (this.moduleIdCore === hostDialog.currentDialog?.moduleIdCore) {
+            var isTabPressed = (e.key === 'Tab' || e.keyCode === 9);
+            if (!isTabPressed) {
+                return;
+            }
+            if (e.shiftKey) {
+                if (document.activeElement === this.focusable.firstFocusableEl) {
+                    (this.focusable.lastFocusableEl as HTMLElement).focus();
+                    e.preventDefault();
+                }
+            } else {
+                if (document.activeElement === this.focusable.lastFocusableEl) {
+                    (this.focusable.firstFocusableEl as HTMLElement).focus();
+                    e.preventDefault();
+                }
+            }
         }
     }
 
     componentDidMount() {
 
-        if (this.props.modal === true) {
-            this.mRefDialog.current?.showModal()
-            this.dialog!.oncancel = () => {
-                if (this.innerValidate) {
-                    const res = this.innerValidate("-2");
-                    if (res === true) {
-                        this.__innerCloseDom({ok: false, mode: '-2', dataBody: undefined});
-                    }
-                } else {
-                    const d = this.props.onCancel!(this.dialog!)
-                    if (d) {
-                        this.__innerCloseDom({ok: false, mode: '-2', dataBody: undefined});
-                    }
+        /*__________close form__________*/
+        const formsCloseList:NodeListOf<HTMLFormElement> |undefined=this.mRefDialog.current?.querySelectorAll('form');
+        if(formsCloseList){
+            formsCloseList!.forEach(a=>{
+               const name=a.getAttribute('method')
+                if(name==='dialog'){
+                    this.formClose=a;
                 }
-                return false
+            })
+            if(this.formClose){
+                this.formClose.addEventListener("submit",()=>{
+                    if(this.innerValidate){
+                        const resValidate=this.innerValidate('dialog')
+                        if(resValidate===false||resValidate===undefined){
+                            return;
+                        }
+                    }
+                    let res:any=undefined;
+                    if(this.innerGetData){
+                        res=this.innerGetData('dialog')
+                    }
+
+                    this.__innerCloseDom({ok:true,mode:'dialog',dataBody:res})
+                })
             }
+        }
+        /*___________________trap-focus______________________*/
+
+        const focusableEls: NodeListOf<HTMLElement> | undefined = this.mRefDialog.current?.querySelectorAll('' +
+            'area[href]:not([tabindex=\'-1\']),' +
+            'iframe:not([tabindex=\'-1\']),' +
+            '[tabindex]:not([tabindex=\'-1\']),' +
+            '[contentEditable=true]:not([tabindex=\'-1\']),' +
+
+            'a[href]:not([disabled]):not([tabindex=\'-1\']),' +
+            ' button:not([disabled]):not([tabindex=\'-1\']),' +
+            ' textarea:not([disabled]):not([tabindex=\'-1\']),' +
+            ' input:not([disabled]):not([tabindex=\'-1\']),' +
+            ' select:not([disabled]):not([tabindex=\'-1\'])');
+        if (focusableEls) {
+            this.focusable.firstFocusableEl = focusableEls[0];
+            this.focusable.lastFocusableEl = focusableEls[focusableEls.length - 1];
+        }
+
+
+        window.addEventListener("keydown", this.FocusTab)
+        if (this.props.modal === true) {
+            window.addEventListener("keyup", this.KeuUpEsc)
+
+            this.mRefDialog.current?.setAttribute('aria-live', 'assertive')
+            this.mRefDialog.current?.setAttribute('aria-modal', 'true')
+
+            // this.dialog!.oncancel = () => {
+            //     if (this.innerValidate) {
+            //         const res = this.innerValidate("-2");
+            //         if (res === true) {
+            //             this.__innerCloseDom({ok: false, mode: '-2', dataBody: undefined});
+            //         }
+            //     } else {
+            //         const d = this.props.onCancel!(this.dialog!)
+            //         if (d) {
+            //             this.__innerCloseDom({ok: false, mode: '-2', dataBody: undefined});
+            //         }
+            //     }
+            //     return false
+            // }
 
         } else {
-            this.mRefDialog.current?.show()
+            this.mRefDialog.current?.setAttribute('aria-modal', 'false')
+            this.mRefAssDiv.current!.style.visibility = 'hidden'
         }
         this.dialog!.onclose = () => {
             if (this.props.onClose) {
@@ -297,20 +385,31 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
 
     }
 
-    public get dialog(): HTMLDialogElement | null | undefined {
+    public get dialog(): HTMLDivElement | null | undefined {
         return this.mRefDialog.current
     }
 
 
     componentWillUnmount() {
-        console.log("unmount")
-        if (hostDialog.moduleId === this.moduleIdCore) {
-            hostDialog.currentDialog = undefined;
-            hostDialog.moduleId = undefined;
-        } else {
-            hostDialog.currentDialog = this.oldDialog;
+        hostDialog.currentDialog = this.oldDialog;
+
+
+        // if (hostDialog.moduleId === this.moduleIdCore) {
+        //     hostDialog.currentDialog = undefined;
+        //     hostDialog.moduleId = undefined;
+        // } else {
+        //     hostDialog.currentDialog = this.oldDialog;
+        // }
+        if (this.props.modal) {
+            window.removeEventListener("keyup", this.KeuUpEsc)
+
         }
+        window.removeEventListener("keydown", this.FocusTab)
+
         document.body.removeChild<Node>(this.props.__container as Node);
+        if (this.lastFocus) {
+            (this.lastFocus as HTMLElement)!.focus()
+        }
         // this.__innerCloseDom(undefined)
     }
 
@@ -381,25 +480,32 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         return (
             <>
 
-                <dialog onClick={(e) => {
-                    this.clickDialog(e)
-                }} className={this.props.className} style={this.props.style} ref={this.mRefDialog}>
+                <div ref={this.mRefAssDiv} className={'ass-dialog'} onClick={this.ClickDialog}></div>
+                <div
+
+                    aria-label={this.props.ariaLabel}
+                    aria-labelledby={this.props.ariaLabelledby}
+                    role={'dialog'}
+
+                    className={this.props.className} style={this.props.style} ref={this.mRefDialog}>
 
                     <div className={'wrapper-inner-dialog'}>
                         <div ref={this.mRefHeaderHost} style={this.props.styleHeader}
                              className={this.props.classNameHeader}>
                             <div style={{width: 'fit-content'}}>{this.props.icon}</div>
                             <div style={{width: '100%'}}>{this.props.header}</div>
-                            <IoMdClose className={'icon-close'} onClick={this.closeModal}/>
+
+                            <button className={'btn-close-modal'} aria-label={'Close'} onClick={this.closeModal}>
+                                <IoMdClose/>
+                            </button>
                         </div>
-                        <div className={this.props.classNameTopStripe}></div>
 
                         <div ref={this.mRefBodyHost} style={this.props.styleBody} className={this.props.classNameBody}>
                             {
                                 this.props.body
                             }
                         </div>
-                        <div className={this.props.classNameBottomStripe}></div>
+
                         <div ref={this.mRefButtonHost} style={this.props.styleFooter}
                              className={this.props.classNameFooter}>
                             {
@@ -410,18 +516,36 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
                     </div>
 
 
-                </dialog>
+                </div>
             </>
 
         );
     }
 
 
-    private clickDialog(e: React.MouseEvent<HTMLDialogElement>) {
-        if (this.props.modal === true && this.props.closeModalDialogClickForeignArea === true) {
-            if (e.currentTarget === e.target) {
+    private ClickDialog() {
+
+        if (this.moduleIdCore === hostDialog.currentDialog?.moduleIdCore) {
+            if (this.props.modal === true && this.props.closeModalDialogClickForeignArea === true) {
                 this.__innerCloseDom({ok: false, mode: "-2"})
             }
+        }
+        return false
+    }
+
+    private KeuUpEsc(e: KeyboardEvent) {
+
+        if (e.key === 'Escape') {
+            if (this.moduleIdCore === hostDialog.currentDialog?.moduleIdCore) {
+                if (this.props.onCancel) {
+                    const res = this.props.onCancel(this.mRefDialog.current!)
+                    if (res === true) {
+                        this.__innerCloseDom({ok: false, mode: '-2'})
+                    }
+                }
+
+            }
+
         }
 
     }

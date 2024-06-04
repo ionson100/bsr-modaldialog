@@ -57,19 +57,19 @@ type ParamsDialog = {
     modal?: boolean;
     /**
      * The event occurs before the modal dialog is closed using the Esc button
-     * @param dialog HTMLDialogElement
+     * @param dialog HTMLDivElement
      */
-    onCancel?: (dialog: InstanceType<typeof HTMLDialogElement> | undefined) => boolean;
+    onCancel?: (dialog: InstanceType<typeof HTMLDivElement> | undefined) => boolean;
     /***
      * Event when closing a dialog
-     * @param dialog HTMLDialogElement
+     * @param dialog  HTMLDivElement
      */
-    onClose?: (dialog: InstanceType<typeof HTMLDialogElement> | undefined) => void;
+    onClose?: (dialog: InstanceType<typeof HTMLDivElement> | undefined) => void;
     /**
      * Event when opening a dialog
-     * @param dialog HTMLDialogElement
+     * @param dialog  HTMLDivElement
      */
-    onShow?: (dialog: InstanceType<typeof HTMLDialogElement> | undefined) => void;
+    onShow?: (dialog: InstanceType<typeof HTMLDivElement> | undefined) => void;
     /**
      * Time in milliseconds until the dialog is automatically closed if the dialog is used as an alert
      */
@@ -94,22 +94,26 @@ type ParamsDialog = {
     classNameHeader?: string;
     classNameBody?: string;
     classNameFooter?: string;
-    classNameTopStripe?: string;
-    classNameBottomStripe?: string;
+    ariaLabel?: string;
+    ariaLabelledby?: string;
 };
 declare class ModalDialog extends React.Component<ParamsDialog, any> {
     static defaultProps: ParamsDialog;
     body: any | undefined;
     promiseInfo: object;
-    mRefDialog: React.RefObject<HTMLDialogElement>;
+    mRefDialog: React.RefObject<HTMLDivElement>;
+    private focusable;
+    formClose: HTMLFormElement | undefined;
     mRefButtonHost: React.RefObject<HTMLDivElement>;
     mRefHeaderHost: React.RefObject<HTMLDivElement>;
     mRefBodyHost: React.RefObject<HTMLDivElement>;
     mRefFocusDiv: React.RefObject<HTMLDivElement>;
+    mRefAssDiv: React.RefObject<HTMLDivElement>;
     oldDialog: ModalDialog | undefined;
     moduleIdCore: string;
     innerValidate: ((mode: string | undefined) => boolean | undefined) | undefined;
     innerGetData: ((mode: string | undefined) => object | undefined) | undefined;
+    lastFocus: Element | null;
     selfClose: (mode: string | undefined) => void;
     constructor({ props }: {
         props: Readonly<ParamsDialog>;
@@ -118,14 +122,16 @@ declare class ModalDialog extends React.Component<ParamsDialog, any> {
     __innerCloseDomError(value: unknown): void;
     closeDialog(mode: string | undefined | null): void;
     checkGlobal(): void;
+    private FocusTab;
     componentDidMount(): void;
-    get dialog(): HTMLDialogElement | null | undefined;
+    get dialog(): HTMLDivElement | null | undefined;
     componentWillUnmount(): void;
     closeModal: () => void;
     clickButton(mode: string | null | undefined): void;
     renderButtons(): any;
     render(): React.JSX.Element;
-    private clickDialog;
+    private ClickDialog;
+    private KeuUpEsc;
 }
 
 declare function ShowBsrDialog(props: ParamsDialog): Promise<ResolvePromise>;

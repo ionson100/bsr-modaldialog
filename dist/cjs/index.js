@@ -2952,7 +2952,6 @@ function IoMdClose (props) {
 var StorageDialog = /** @class */ (function () {
     function StorageDialog() {
         this.currentDialog = undefined;
-        this.moduleId = undefined;
     }
     return StorageDialog;
 }());
@@ -3027,6 +3026,10 @@ var ModalDialog = /** @class */ (function (_super) {
         _this.closeModal = function () {
             _this.clickButton("-1");
         };
+        _this.focusable = {
+            lastFocusableEl: undefined,
+            firstFocusableEl: undefined
+        };
         _this.promiseInfo = {};
         _this.state = {
             isShow: false
@@ -3040,32 +3043,36 @@ var ModalDialog = /** @class */ (function (_super) {
         _this.mRefButtonHost = React.createRef();
         _this.mRefBodyHost = React.createRef();
         _this.mRefFocusDiv = React.createRef();
+        _this.mRefAssDiv = React.createRef();
         _this.clickButton = _this.clickButton.bind(_this);
+        _this.KeuUpEsc = _this.KeuUpEsc.bind(_this);
+        _this.FocusTab = _this.FocusTab.bind(_this);
+        _this.ClickDialog = _this.ClickDialog.bind(_this);
+        _this.lastFocus = document.activeElement;
+        _this.formClose = undefined;
         _this.checkGlobal();
         return _this;
     }
     ModalDialog.prototype.__innerCloseDom = function (value) {
-        var _a, _b, _c;
-        (_a = this.mRefDialog.current) === null || _a === void 0 ? void 0 : _a.close();
+        var _a, _b;
         //document.body.removeChild<Node>(this.props.__container as Node);
         if (value) {
-            (_b = this.props._promise) === null || _b === void 0 ? void 0 : _b.resolve(value);
+            (_a = this.props._promise) === null || _a === void 0 ? void 0 : _a.resolve(value);
         }
-        (_c = this.props.__actionUnmount) === null || _c === void 0 ? void 0 : _c.call(undefined);
+        (_b = this.props.__actionUnmount) === null || _b === void 0 ? void 0 : _b.call(undefined);
     };
     ModalDialog.prototype.__innerCloseDomError = function (value) {
-        var _a, _b, _c;
+        var _a, _b;
         var error = 'inner error, watch console';
         if (value) {
             error = value === null || value === void 0 ? void 0 : value.message;
         }
         (_a = this.props._promise) === null || _a === void 0 ? void 0 : _a.reject(new Error(error));
         if (this.props._promise) {
-            console.log(error);
             this.props._promise.reject(new Error(error));
         }
-        (_b = this.mRefDialog.current) === null || _b === void 0 ? void 0 : _b.close();
-        (_c = this.props.__actionUnmount) === null || _c === void 0 ? void 0 : _c.call(undefined);
+        console.error(error);
+        (_b = this.props.__actionUnmount) === null || _b === void 0 ? void 0 : _b.call(undefined);
     };
     ModalDialog.prototype.closeDialog = function (mode) {
         this.__innerCloseDom({ ok: false, mode: mode, dataBody: undefined });
@@ -3073,33 +3080,97 @@ var ModalDialog = /** @class */ (function (_super) {
     ModalDialog.prototype.checkGlobal = function () {
         this.oldDialog = hostDialog.currentDialog;
         hostDialog.currentDialog = this;
-        if (!hostDialog.moduleId) {
-            hostDialog.moduleId = this.moduleIdCore;
+        // if (!hostDialog.moduleId) {
+        //     hostDialog.moduleId = this.moduleIdCore;
+        // }
+    };
+    ModalDialog.prototype.FocusTab = function (e) {
+        var _a;
+        if (this.moduleIdCore === ((_a = hostDialog.currentDialog) === null || _a === void 0 ? void 0 : _a.moduleIdCore)) {
+            var isTabPressed = (e.key === 'Tab' || e.keyCode === 9);
+            if (!isTabPressed) {
+                return;
+            }
+            if (e.shiftKey) {
+                if (document.activeElement === this.focusable.firstFocusableEl) {
+                    this.focusable.lastFocusableEl.focus();
+                    e.preventDefault();
+                }
+            }
+            else {
+                if (document.activeElement === this.focusable.lastFocusableEl) {
+                    this.focusable.firstFocusableEl.focus();
+                    e.preventDefault();
+                }
+            }
         }
     };
     ModalDialog.prototype.componentDidMount = function () {
         var _this = this;
-        var _a, _b, _c, _d;
+        var _a, _b, _c, _d, _e, _f, _g;
+        /*__________close form__________*/
+        var formsCloseList = (_a = this.mRefDialog.current) === null || _a === void 0 ? void 0 : _a.querySelectorAll('form');
+        if (formsCloseList) {
+            formsCloseList.forEach(function (a) {
+                var name = a.getAttribute('method');
+                if (name === 'dialog') {
+                    _this.formClose = a;
+                }
+            });
+            if (this.formClose) {
+                this.formClose.addEventListener("submit", function () {
+                    if (_this.innerValidate) {
+                        var resValidate = _this.innerValidate('dialog');
+                        if (resValidate === false || resValidate === undefined) {
+                            return;
+                        }
+                    }
+                    var res = undefined;
+                    if (_this.innerGetData) {
+                        res = _this.innerGetData('dialog');
+                    }
+                    _this.__innerCloseDom({ ok: true, mode: 'dialog', dataBody: res });
+                });
+            }
+        }
+        /*___________________trap-focus______________________*/
+        var focusableEls = (_b = this.mRefDialog.current) === null || _b === void 0 ? void 0 : _b.querySelectorAll('' +
+            'area[href]:not([tabindex=\'-1\']),' +
+            'iframe:not([tabindex=\'-1\']),' +
+            '[tabindex]:not([tabindex=\'-1\']),' +
+            '[contentEditable=true]:not([tabindex=\'-1\']),' +
+            'a[href]:not([disabled]):not([tabindex=\'-1\']),' +
+            ' button:not([disabled]):not([tabindex=\'-1\']),' +
+            ' textarea:not([disabled]):not([tabindex=\'-1\']),' +
+            ' input:not([disabled]):not([tabindex=\'-1\']),' +
+            ' select:not([disabled]):not([tabindex=\'-1\'])');
+        if (focusableEls) {
+            this.focusable.firstFocusableEl = focusableEls[0];
+            this.focusable.lastFocusableEl = focusableEls[focusableEls.length - 1];
+        }
+        window.addEventListener("keydown", this.FocusTab);
         if (this.props.modal === true) {
-            (_a = this.mRefDialog.current) === null || _a === void 0 ? void 0 : _a.showModal();
-            this.dialog.oncancel = function () {
-                if (_this.innerValidate) {
-                    var res = _this.innerValidate("-2");
-                    if (res === true) {
-                        _this.__innerCloseDom({ ok: false, mode: '-2', dataBody: undefined });
-                    }
-                }
-                else {
-                    var d = _this.props.onCancel(_this.dialog);
-                    if (d) {
-                        _this.__innerCloseDom({ ok: false, mode: '-2', dataBody: undefined });
-                    }
-                }
-                return false;
-            };
+            window.addEventListener("keyup", this.KeuUpEsc);
+            (_c = this.mRefDialog.current) === null || _c === void 0 ? void 0 : _c.setAttribute('aria-live', 'assertive');
+            (_d = this.mRefDialog.current) === null || _d === void 0 ? void 0 : _d.setAttribute('aria-modal', 'true');
+            // this.dialog!.oncancel = () => {
+            //     if (this.innerValidate) {
+            //         const res = this.innerValidate("-2");
+            //         if (res === true) {
+            //             this.__innerCloseDom({ok: false, mode: '-2', dataBody: undefined});
+            //         }
+            //     } else {
+            //         const d = this.props.onCancel!(this.dialog!)
+            //         if (d) {
+            //             this.__innerCloseDom({ok: false, mode: '-2', dataBody: undefined});
+            //         }
+            //     }
+            //     return false
+            // }
         }
         else {
-            (_b = this.mRefDialog.current) === null || _b === void 0 ? void 0 : _b.show();
+            (_e = this.mRefDialog.current) === null || _e === void 0 ? void 0 : _e.setAttribute('aria-modal', 'false');
+            this.mRefAssDiv.current.style.visibility = 'hidden';
         }
         this.dialog.onclose = function () {
             if (_this.props.onClose) {
@@ -3109,8 +3180,8 @@ var ModalDialog = /** @class */ (function (_super) {
         if (!this.props.icon && !this.props.header && this.mRefHeaderHost.current) {
             this.mRefHeaderHost.current.remove();
         }
-        if (((_c = this.props.buttons) === null || _c === void 0 ? void 0 : _c.length) == 0) {
-            (_d = this.mRefButtonHost.current) === null || _d === void 0 ? void 0 : _d.remove();
+        if (((_f = this.props.buttons) === null || _f === void 0 ? void 0 : _f.length) == 0) {
+            (_g = this.mRefButtonHost.current) === null || _g === void 0 ? void 0 : _g.remove();
         }
         if (this.mRefFocusDiv.current && this.mRefFocusDiv.current.children[0]) {
             this.mRefFocusDiv.current.children[0].focus();
@@ -3135,15 +3206,21 @@ var ModalDialog = /** @class */ (function (_super) {
         configurable: true
     });
     ModalDialog.prototype.componentWillUnmount = function () {
-        console.log("unmount");
-        if (hostDialog.moduleId === this.moduleIdCore) {
-            hostDialog.currentDialog = undefined;
-            hostDialog.moduleId = undefined;
+        hostDialog.currentDialog = this.oldDialog;
+        // if (hostDialog.moduleId === this.moduleIdCore) {
+        //     hostDialog.currentDialog = undefined;
+        //     hostDialog.moduleId = undefined;
+        // } else {
+        //     hostDialog.currentDialog = this.oldDialog;
+        // }
+        if (this.props.modal) {
+            window.removeEventListener("keyup", this.KeuUpEsc);
         }
-        else {
-            hostDialog.currentDialog = this.oldDialog;
-        }
+        window.removeEventListener("keydown", this.FocusTab);
         document.body.removeChild(this.props.__container);
+        if (this.lastFocus) {
+            this.lastFocus.focus();
+        }
         // this.__innerCloseDom(undefined)
     };
     ModalDialog.prototype.clickButton = function (mode) {
@@ -3195,25 +3272,37 @@ var ModalDialog = /** @class */ (function (_super) {
         return divs;
     };
     ModalDialog.prototype.render = function () {
-        var _this = this;
         return (React.createElement(React.Fragment, null,
-            React.createElement("dialog", { onClick: function (e) {
-                    _this.clickDialog(e);
-                }, className: this.props.className, style: this.props.style, ref: this.mRefDialog },
+            React.createElement("div", { ref: this.mRefAssDiv, className: 'ass-dialog', onClick: this.ClickDialog }),
+            React.createElement("div", { "aria-label": this.props.ariaLabel, "aria-labelledby": this.props.ariaLabelledby, role: 'dialog', className: this.props.className, style: this.props.style, ref: this.mRefDialog },
                 React.createElement("div", { className: 'wrapper-inner-dialog' },
                     React.createElement("div", { ref: this.mRefHeaderHost, style: this.props.styleHeader, className: this.props.classNameHeader },
                         React.createElement("div", { style: { width: 'fit-content' } }, this.props.icon),
                         React.createElement("div", { style: { width: '100%' } }, this.props.header),
-                        React.createElement(IoMdClose, { className: 'icon-close', onClick: this.closeModal })),
-                    React.createElement("div", { className: this.props.classNameTopStripe }),
+                        React.createElement("button", { className: 'btn-close-modal', "aria-label": 'Close', onClick: this.closeModal },
+                            React.createElement(IoMdClose, null))),
                     React.createElement("div", { ref: this.mRefBodyHost, style: this.props.styleBody, className: this.props.classNameBody }, this.props.body),
-                    React.createElement("div", { className: this.props.classNameBottomStripe }),
                     React.createElement("div", { ref: this.mRefButtonHost, style: this.props.styleFooter, className: this.props.classNameFooter }, this.renderButtons())))));
     };
-    ModalDialog.prototype.clickDialog = function (e) {
-        if (this.props.modal === true && this.props.closeModalDialogClickForeignArea === true) {
-            if (e.currentTarget === e.target) {
+    ModalDialog.prototype.ClickDialog = function () {
+        var _a;
+        if (this.moduleIdCore === ((_a = hostDialog.currentDialog) === null || _a === void 0 ? void 0 : _a.moduleIdCore)) {
+            if (this.props.modal === true && this.props.closeModalDialogClickForeignArea === true) {
                 this.__innerCloseDom({ ok: false, mode: "-2" });
+            }
+        }
+        return false;
+    };
+    ModalDialog.prototype.KeuUpEsc = function (e) {
+        var _a;
+        if (e.key === 'Escape') {
+            if (this.moduleIdCore === ((_a = hostDialog.currentDialog) === null || _a === void 0 ? void 0 : _a.moduleIdCore)) {
+                if (this.props.onCancel) {
+                    var res = this.props.onCancel(this.mRefDialog.current);
+                    if (res === true) {
+                        this.__innerCloseDom({ ok: false, mode: '-2' });
+                    }
+                }
             }
         }
     };
@@ -3228,8 +3317,6 @@ var ModalDialog = /** @class */ (function (_super) {
         classNameBody: "m-body",
         classNameFooter: "m-footer",
         classNameHeader: "m-header",
-        classNameTopStripe: "top-stripe",
-        classNameBottomStripe: "bottom-stripe"
     };
     return ModalDialog;
 }(React.Component));

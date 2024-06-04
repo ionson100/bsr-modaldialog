@@ -90,6 +90,7 @@ type ParamsDialog = {
         reject: (reason?: any) => void;
     };
     __actionUnmount?: () => void;
+    classNameAssDialog?: string;
     className?: string;
     classNameHeader?: string;
     classNameBody?: string;

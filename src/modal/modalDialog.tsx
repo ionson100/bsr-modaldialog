@@ -116,6 +116,8 @@ export type ParamsDialog = {
         resolve: (value: ResolvePromise) => void, reject: (reason?: any) => void
     },
     __actionUnmount?: () => void
+
+    classNameAssDialog?: string;
     className?: string;
     classNameHeader?: string;
     classNameBody?: string;
@@ -141,6 +143,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         classNameBody: "m-body",
         classNameFooter: "m-footer",
         classNameHeader: "m-header",
+        classNameAssDialog:"ass-dialog"
 
 
     }
@@ -480,7 +483,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         return (
             <>
 
-                <div ref={this.mRefAssDiv} className={'ass-dialog'} onClick={this.ClickDialog}></div>
+                <div ref={this.mRefAssDiv} className={this.props.classNameAssDialog} onClick={this.ClickDialog}></div>
                 <div
 
                     aria-label={this.props.ariaLabel}

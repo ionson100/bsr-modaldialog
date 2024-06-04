@@ -3271,7 +3271,7 @@ var ModalDialog = /** @class */ (function (_super) {
     };
     ModalDialog.prototype.render = function () {
         return (React.createElement(React.Fragment, null,
-            React.createElement("div", { ref: this.mRefAssDiv, className: 'ass-dialog', onClick: this.ClickDialog }),
+            React.createElement("div", { ref: this.mRefAssDiv, className: this.props.classNameAssDialog, onClick: this.ClickDialog }),
             React.createElement("div", { "aria-label": this.props.ariaLabel, "aria-labelledby": this.props.ariaLabelledby, role: 'dialog', className: this.props.className, style: this.props.style, ref: this.mRefDialog },
                 React.createElement("div", { className: 'wrapper-inner-dialog' },
                     React.createElement("div", { ref: this.mRefHeaderHost, style: this.props.styleHeader, className: this.props.classNameHeader },
@@ -3315,6 +3315,7 @@ var ModalDialog = /** @class */ (function (_super) {
         classNameBody: "m-body",
         classNameFooter: "m-footer",
         classNameHeader: "m-header",
+        classNameAssDialog: "ass-dialog"
     };
     return ModalDialog;
 }(React.Component));

@@ -519,8 +519,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
                     </div>
 
 
-                </div>
-                </div>
+                </div></div>
             </>
 
         );

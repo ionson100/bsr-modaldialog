@@ -3066,7 +3066,7 @@ var ModalDialog = /** @class */ (function (_super) {
         return _this;
     }
     ModalDialog.prototype.__innerCloseDom = function (mode) {
-        var _a, _b, _c;
+        var _a, _b, _c, _d;
         try {
             var d = mode === null || mode === void 0 ? void 0 : mode.toString();
             var dataBody = undefined;
@@ -3083,20 +3083,26 @@ var ModalDialog = /** @class */ (function (_super) {
                 res = false;
             }
             (_a = this.props._promise) === null || _a === void 0 ? void 0 : _a.resolve({ ok: res, mode: d, dataBody: dataBody });
+            (_b = this.props.__actionUnmount) === null || _b === void 0 ? void 0 : _b.call(undefined);
         }
         catch (value) {
-            var error = 'inner error, watch console';
-            if (value) {
-                error = value === null || value === void 0 ? void 0 : value.message;
+            try {
+                var error = 'inner error, watch console';
+                if (value) {
+                    error = value === null || value === void 0 ? void 0 : value.message;
+                }
+                (_c = this.props._promise) === null || _c === void 0 ? void 0 : _c.reject(new Error(error));
+                if (this.props._promise) {
+                    this.props._promise.reject(new Error(error));
+                }
+                console.error(error);
             }
-            (_b = this.props._promise) === null || _b === void 0 ? void 0 : _b.reject(new Error(error));
-            if (this.props._promise) {
-                this.props._promise.reject(new Error(error));
+            catch (e) {
+                console.error(e);
             }
-            console.error(error);
-        }
-        finally {
-            (_c = this.props.__actionUnmount) === null || _c === void 0 ? void 0 : _c.call(undefined);
+            finally {
+                (_d = this.props.__actionUnmount) === null || _d === void 0 ? void 0 : _d.call(undefined);
+            }
         }
     };
     ModalDialog.prototype.closeDialog = function (mode) {

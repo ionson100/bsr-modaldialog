@@ -235,21 +235,26 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
             }
 
             this.props._promise?.resolve({ok: res, mode: d, dataBody: dataBody});
-        } catch (value) {
-            let error = 'inner error, watch console'
-            if (value) {
-                error = (value as ErrorEvent)?.message;
-            }
-
-            this.props._promise?.reject(new Error(error));
-
-            if (this.props._promise) {
-
-                this.props._promise.reject(new Error(error));
-            }
-            console.error(error)
-        } finally {
             this.props.__actionUnmount?.call(undefined)
+        } catch (value) {
+            try{
+                let error = 'inner error, watch console'
+                if (value) {
+                    error = (value as ErrorEvent)?.message;
+                }
+
+                this.props._promise?.reject(new Error(error));
+
+                if (this.props._promise) {
+                    this.props._promise.reject(new Error(error));
+                }
+                console.error(error)
+            }catch (e){
+                console.error(e)
+            }finally {
+                this.props.__actionUnmount?.call(undefined)
+            }
+
         }
     }
 

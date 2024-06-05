@@ -144,7 +144,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         classNameBody: "m-body",
         classNameFooter: "m-footer",
         classNameHeader: "m-header",
-        classNameAssDialog:"ass-dialog"
+        classNameAssDialog: "ass-dialog"
 
 
     }
@@ -157,7 +157,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         firstFocusableEl: HTMLElement | undefined,
         lastFocusableEl: HTMLElement | undefined
     }
-    public formClose:HTMLFormElement|undefined
+    public formClose: HTMLFormElement | undefined
 
 
     public mRefButtonHost: React.RefObject<HTMLDivElement>
@@ -208,63 +208,65 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         this.clickButton = this.clickButton.bind(this)
         this.KeuUpEsc = this.KeuUpEsc.bind(this)
         this.FocusTab = this.FocusTab.bind(this)
-        this.ClickDialog=this.ClickDialog.bind(this)
+        this.ClickDialog = this.ClickDialog.bind(this)
         this.lastFocus = document.activeElement
-        this.formClose=undefined;
+        this.formClose = undefined;
         this.checkGlobal();
 
     }
 
-    __innerCloseDom(value: ResolvePromise | undefined) {
+    __innerCloseDom(mode: string | null | undefined) {
 
+        try {
+            const d: string | null | undefined = mode?.toString();
 
-        //document.body.removeChild<Node>(this.props.__container as Node);
-        if (value) {
-            this.props._promise?.resolve(value);
+            let dataBody: object | undefined = undefined;
+            if (this.innerValidate) {
+                const res = this.innerValidate(d)
+                if (res !== true) return
+            }
+            if (this.innerGetData) {
+                dataBody = this.innerGetData(d);
+            }
+
+            let res: boolean = true;
+            if (d === '-1' || d === '-2') {
+                res = false;
+            }
+
+            this.props._promise?.resolve({ok: res, mode: d, dataBody: dataBody});
+        } catch (value) {
+            let error = 'inner error, watch console'
+            if (value) {
+                error = (value as ErrorEvent)?.message;
+            }
+
+            this.props._promise?.reject(new Error(error));
+
+            if (this.props._promise) {
+
+                this.props._promise.reject(new Error(error));
+            }
+            console.error(error)
+        } finally {
+            this.props.__actionUnmount?.call(undefined)
         }
-        this.props.__actionUnmount?.call(undefined)
     }
 
-    __innerCloseDomError(value: unknown) {
-
-
-        let error = 'inner error, watch console'
-        if (value) {
-            error = (value as ErrorEvent)?.message;
-        }
-
-        this.props._promise?.reject(new Error(error));
-
-        if (this.props._promise) {
-
-            this.props._promise.reject(new Error(error));
-        }
-        console.error(error)
-
-
-        this.props.__actionUnmount?.call(undefined)
-
-
-    }
 
     closeDialog(mode: string | undefined | null) {
-        this.__innerCloseDom({ok: false, mode: mode, dataBody: undefined})
+        this.__innerCloseDom(mode)
     }
 
     checkGlobal() {
 
-
         this.oldDialog = hostDialog.currentDialog
-
         hostDialog.currentDialog = this;
-        // if (!hostDialog.moduleId) {
-        //     hostDialog.moduleId = this.moduleIdCore;
-        // }
     }
 
     private FocusTab(e: KeyboardEvent) {
         if (this.moduleIdCore === hostDialog.currentDialog?.moduleIdCore) {
-            var isTabPressed = (e.key === 'Tab' || e.keyCode === 9);
+            const isTabPressed = (e.key === 'Tab' || e.keyCode === 9);
             if (!isTabPressed) {
                 return;
             }
@@ -285,28 +287,17 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
     componentDidMount() {
 
         /*__________close form__________*/
-        const formsCloseList:NodeListOf<HTMLFormElement> |undefined=this.mRefDialog.current?.querySelectorAll('form');
-        if(formsCloseList){
-            formsCloseList!.forEach(a=>{
-               const name=a.getAttribute('method')
-                if(name==='dialog'){
-                    this.formClose=a;
+        const formsCloseList: NodeListOf<HTMLFormElement> | undefined = this.mRefDialog.current?.querySelectorAll('form');
+        if (formsCloseList) {
+            formsCloseList!.forEach(a => {
+                const name = a.getAttribute('method')
+                if (name === 'dialog') {
+                    this.formClose = a;
                 }
             })
-            if(this.formClose){
-                this.formClose.addEventListener("submit",()=>{
-                    if(this.innerValidate){
-                        const resValidate=this.innerValidate('dialog')
-                        if(resValidate===false||resValidate===undefined){
-                            return;
-                        }
-                    }
-                    let res:any=undefined;
-                    if(this.innerGetData){
-                        res=this.innerGetData('dialog')
-                    }
-
-                    this.__innerCloseDom({ok:true,mode:'dialog',dataBody:res})
+            if (this.formClose) {
+                this.formClose.addEventListener("submit", () => {
+                    this.__innerCloseDom('dialog')
                 })
             }
         }
@@ -335,21 +326,6 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
 
             this.mRefDialog.current?.setAttribute('aria-live', 'assertive')
             this.mRefDialog.current?.setAttribute('aria-modal', 'true')
-
-            // this.dialog!.oncancel = () => {
-            //     if (this.innerValidate) {
-            //         const res = this.innerValidate("-2");
-            //         if (res === true) {
-            //             this.__innerCloseDom({ok: false, mode: '-2', dataBody: undefined});
-            //         }
-            //     } else {
-            //         const d = this.props.onCancel!(this.dialog!)
-            //         if (d) {
-            //             this.__innerCloseDom({ok: false, mode: '-2', dataBody: undefined});
-            //         }
-            //     }
-            //     return false
-            // }
 
         } else {
             this.mRefDialog.current?.setAttribute('aria-modal', 'false')
@@ -383,13 +359,13 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         }
         if (this.props.timeOut) {
             setTimeout(() => {
-                this.__innerCloseDom({ok: false, mode: "-1", dataBody: undefined})
+                this.__innerCloseDom('-1')
             }, this.props.timeOut)
         }
 
-        const zet:number=findHighestZIndex('div');
-        this.mRefAssDiv.current!.style.zIndex=""+(zet+1)
-        this.mRefDialog.current!.style.zIndex=""+(zet+2)
+        const zet: number = findHighestZIndex('div');
+        this.mRefAssDiv.current!.style.zIndex = "" + (zet + 1)
+        this.mRefDialog.current!.style.zIndex = "" + (zet + 2)
 
     }
 
@@ -427,33 +403,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
     }
 
     clickButton(mode: string | null | undefined) {
-
-
-        try {
-
-            const d: string | null | undefined = mode?.toString();
-
-            let dataBody: object | undefined = undefined;
-            if (this.innerValidate) {
-                const res = this.innerValidate(d)
-                if (res !== true) return
-            }
-            if (this.innerGetData) {
-                dataBody = this.innerGetData(d);
-            }
-
-            let res: boolean = true;
-            if (d === '-1' || d === '-2') {
-                res = false;
-            }
-
-
-            this.__innerCloseDom({ok: res, mode: d, dataBody: dataBody})
-
-        } catch (e) {
-            this.__innerCloseDomError(e)
-            throw e;
-        }
+        this.__innerCloseDom(mode)
     }
 
     renderButtons(): any {
@@ -490,39 +440,33 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
 
                 <div ref={this.mRefAssDiv} className={this.props.classNameAssDialog} onClick={this.ClickDialog}/>
                 <div
-
                     aria-label={this.props.ariaLabel}
                     aria-labelledby={this.props.ariaLabelledby}
                     role={'dialog'}
-
                     className={this.props.className} style={this.props.style} ref={this.mRefDialog}>
 
-                    <div className={'wrapper-inner-dialog'}>
-                        <div ref={this.mRefHeaderHost} style={this.props.styleHeader}
-                             className={this.props.classNameHeader}>
-                            <div style={{width: 'fit-content'}}>{this.props.icon}</div>
-                            <div style={{width: '100%'}}>{this.props.header}</div>
+                    <div ref={this.mRefHeaderHost} style={this.props.styleHeader}
+                         className={this.props.classNameHeader}>
+                        <div style={{width: 'fit-content'}}>{this.props.icon}</div>
+                        <div style={{width: '100%'}}>{this.props.header}</div>
 
-                            <button className={'btn-close-modal'} aria-label={'Close'} onClick={this.closeModal}>
-                                <IoMdClose/>
-                            </button>
-                        </div>
-
-                        <div ref={this.mRefBodyHost} style={this.props.styleBody} className={this.props.classNameBody}>
-                            {
-                                this.props.body
-                            }
-                        </div>
-
-                        <div ref={this.mRefButtonHost} style={this.props.styleFooter}
-                             className={this.props.classNameFooter}>
-                            {
-                                this.renderButtons()
-                            }
-                        </div>
-
+                        <button className={'btn-close-modal'} aria-label={'Close'} onClick={this.closeModal}>
+                            <IoMdClose/>
+                        </button>
                     </div>
 
+                    <div ref={this.mRefBodyHost} style={this.props.styleBody} className={this.props.classNameBody}>
+                        {
+                            this.props.body
+                        }
+                    </div>
+
+                    <div ref={this.mRefButtonHost} style={this.props.styleFooter}
+                         className={this.props.classNameFooter}>
+                        {
+                            this.renderButtons()
+                        }
+                    </div>
 
                 </div>
             </>
@@ -535,7 +479,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
 
         if (this.moduleIdCore === hostDialog.currentDialog?.moduleIdCore) {
             if (this.props.modal === true && this.props.closeModalDialogClickForeignArea === true) {
-                this.__innerCloseDom({ok: false, mode: "-2"})
+                this.__innerCloseDom('-2')
             }
         }
         return false
@@ -547,8 +491,8 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
             if (this.moduleIdCore === hostDialog.currentDialog?.moduleIdCore) {
                 if (this.props.onCancel) {
                     const res = this.props.onCancel(this.mRefDialog.current!)
-                    if (res === true) {
-                        this.__innerCloseDom({ok: false, mode: '-2'})
+                    if (res) {
+                        this.__innerCloseDom('-2')
                     }
                 }
 

@@ -3063,36 +3063,46 @@ var ModalDialog = /** @class */ (function (_super) {
         _this.checkGlobal();
         return _this;
     }
-    ModalDialog.prototype.__innerCloseDom = function (value) {
-        var _a, _b;
-        //document.body.removeChild<Node>(this.props.__container as Node);
-        if (value) {
-            (_a = this.props._promise) === null || _a === void 0 ? void 0 : _a.resolve(value);
+    ModalDialog.prototype.__innerCloseDom = function (mode) {
+        var _a, _b, _c;
+        try {
+            var d = mode === null || mode === void 0 ? void 0 : mode.toString();
+            var dataBody = undefined;
+            if (this.innerValidate) {
+                var res_1 = this.innerValidate(d);
+                if (res_1 !== true)
+                    return;
+            }
+            if (this.innerGetData) {
+                dataBody = this.innerGetData(d);
+            }
+            var res = true;
+            if (d === '-1' || d === '-2') {
+                res = false;
+            }
+            (_a = this.props._promise) === null || _a === void 0 ? void 0 : _a.resolve({ ok: res, mode: d, dataBody: dataBody });
         }
-        (_b = this.props.__actionUnmount) === null || _b === void 0 ? void 0 : _b.call(undefined);
-    };
-    ModalDialog.prototype.__innerCloseDomError = function (value) {
-        var _a, _b;
-        var error = 'inner error, watch console';
-        if (value) {
-            error = value === null || value === void 0 ? void 0 : value.message;
+        catch (value) {
+            var error = 'inner error, watch console';
+            if (value) {
+                error = value === null || value === void 0 ? void 0 : value.message;
+            }
+            (_b = this.props._promise) === null || _b === void 0 ? void 0 : _b.reject(new Error(error));
+            if (this.props._promise) {
+                this.props._promise.reject(new Error(error));
+            }
+            console.error(error);
         }
-        (_a = this.props._promise) === null || _a === void 0 ? void 0 : _a.reject(new Error(error));
-        if (this.props._promise) {
-            this.props._promise.reject(new Error(error));
+        finally {
+            (_c = this.props.__actionUnmount) === null || _c === void 0 ? void 0 : _c.call(undefined);
         }
-        console.error(error);
-        (_b = this.props.__actionUnmount) === null || _b === void 0 ? void 0 : _b.call(undefined);
     };
     ModalDialog.prototype.closeDialog = function (mode) {
-        this.__innerCloseDom({ ok: false, mode: mode, dataBody: undefined });
+        this.__innerCloseDom(mode);
     };
     ModalDialog.prototype.checkGlobal = function () {
         this.oldDialog = hostDialog.currentDialog;
         hostDialog.currentDialog = this;
-        // if (!hostDialog.moduleId) {
-        //     hostDialog.moduleId = this.moduleIdCore;
-        // }
     };
     ModalDialog.prototype.FocusTab = function (e) {
         var _a;
@@ -3129,17 +3139,7 @@ var ModalDialog = /** @class */ (function (_super) {
             });
             if (this.formClose) {
                 this.formClose.addEventListener("submit", function () {
-                    if (_this.innerValidate) {
-                        var resValidate = _this.innerValidate('dialog');
-                        if (resValidate === false || resValidate === undefined) {
-                            return;
-                        }
-                    }
-                    var res = undefined;
-                    if (_this.innerGetData) {
-                        res = _this.innerGetData('dialog');
-                    }
-                    _this.__innerCloseDom({ ok: true, mode: 'dialog', dataBody: res });
+                    _this.__innerCloseDom('dialog');
                 });
             }
         }
@@ -3163,20 +3163,6 @@ var ModalDialog = /** @class */ (function (_super) {
             window.addEventListener("keyup", this.KeuUpEsc);
             (_c = this.mRefDialog.current) === null || _c === void 0 ? void 0 : _c.setAttribute('aria-live', 'assertive');
             (_d = this.mRefDialog.current) === null || _d === void 0 ? void 0 : _d.setAttribute('aria-modal', 'true');
-            // this.dialog!.oncancel = () => {
-            //     if (this.innerValidate) {
-            //         const res = this.innerValidate("-2");
-            //         if (res === true) {
-            //             this.__innerCloseDom({ok: false, mode: '-2', dataBody: undefined});
-            //         }
-            //     } else {
-            //         const d = this.props.onCancel!(this.dialog!)
-            //         if (d) {
-            //             this.__innerCloseDom({ok: false, mode: '-2', dataBody: undefined});
-            //         }
-            //     }
-            //     return false
-            // }
         }
         else {
             (_e = this.mRefDialog.current) === null || _e === void 0 ? void 0 : _e.setAttribute('aria-modal', 'false');
@@ -3204,7 +3190,7 @@ var ModalDialog = /** @class */ (function (_super) {
         }
         if (this.props.timeOut) {
             setTimeout(function () {
-                _this.__innerCloseDom({ ok: false, mode: "-1", dataBody: undefined });
+                _this.__innerCloseDom('-1');
             }, this.props.timeOut);
         }
         var zet = findHighestZIndex('div');
@@ -3237,27 +3223,7 @@ var ModalDialog = /** @class */ (function (_super) {
         // this.__innerCloseDom(undefined)
     };
     ModalDialog.prototype.clickButton = function (mode) {
-        try {
-            var d = mode === null || mode === void 0 ? void 0 : mode.toString();
-            var dataBody = undefined;
-            if (this.innerValidate) {
-                var res_1 = this.innerValidate(d);
-                if (res_1 !== true)
-                    return;
-            }
-            if (this.innerGetData) {
-                dataBody = this.innerGetData(d);
-            }
-            var res = true;
-            if (d === '-1' || d === '-2') {
-                res = false;
-            }
-            this.__innerCloseDom({ ok: res, mode: d, dataBody: dataBody });
-        }
-        catch (e) {
-            this.__innerCloseDomError(e);
-            throw e;
-        }
+        this.__innerCloseDom(mode);
     };
     ModalDialog.prototype.renderButtons = function () {
         var _this = this;
@@ -3288,20 +3254,19 @@ var ModalDialog = /** @class */ (function (_super) {
         return (React.createElement(React.Fragment, null,
             React.createElement("div", { ref: this.mRefAssDiv, className: this.props.classNameAssDialog, onClick: this.ClickDialog }),
             React.createElement("div", { "aria-label": this.props.ariaLabel, "aria-labelledby": this.props.ariaLabelledby, role: 'dialog', className: this.props.className, style: this.props.style, ref: this.mRefDialog },
-                React.createElement("div", { className: 'wrapper-inner-dialog' },
-                    React.createElement("div", { ref: this.mRefHeaderHost, style: this.props.styleHeader, className: this.props.classNameHeader },
-                        React.createElement("div", { style: { width: 'fit-content' } }, this.props.icon),
-                        React.createElement("div", { style: { width: '100%' } }, this.props.header),
-                        React.createElement("button", { className: 'btn-close-modal', "aria-label": 'Close', onClick: this.closeModal },
-                            React.createElement(IoMdClose, null))),
-                    React.createElement("div", { ref: this.mRefBodyHost, style: this.props.styleBody, className: this.props.classNameBody }, this.props.body),
-                    React.createElement("div", { ref: this.mRefButtonHost, style: this.props.styleFooter, className: this.props.classNameFooter }, this.renderButtons())))));
+                React.createElement("div", { ref: this.mRefHeaderHost, style: this.props.styleHeader, className: this.props.classNameHeader },
+                    React.createElement("div", { style: { width: 'fit-content' } }, this.props.icon),
+                    React.createElement("div", { style: { width: '100%' } }, this.props.header),
+                    React.createElement("button", { className: 'btn-close-modal', "aria-label": 'Close', onClick: this.closeModal },
+                        React.createElement(IoMdClose, null))),
+                React.createElement("div", { ref: this.mRefBodyHost, style: this.props.styleBody, className: this.props.classNameBody }, this.props.body),
+                React.createElement("div", { ref: this.mRefButtonHost, style: this.props.styleFooter, className: this.props.classNameFooter }, this.renderButtons()))));
     };
     ModalDialog.prototype.ClickDialog = function () {
         var _a;
         if (this.moduleIdCore === ((_a = hostDialog.currentDialog) === null || _a === void 0 ? void 0 : _a.moduleIdCore)) {
             if (this.props.modal === true && this.props.closeModalDialogClickForeignArea === true) {
-                this.__innerCloseDom({ ok: false, mode: "-2" });
+                this.__innerCloseDom('-2');
             }
         }
         return false;
@@ -3312,8 +3277,8 @@ var ModalDialog = /** @class */ (function (_super) {
             if (this.moduleIdCore === ((_a = hostDialog.currentDialog) === null || _a === void 0 ? void 0 : _a.moduleIdCore)) {
                 if (this.props.onCancel) {
                     var res = this.props.onCancel(this.mRefDialog.current);
-                    if (res === true) {
-                        this.__innerCloseDom({ ok: false, mode: '-2' });
+                    if (res) {
+                        this.__innerCloseDom('-2');
                     }
                 }
             }

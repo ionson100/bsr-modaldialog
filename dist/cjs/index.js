@@ -3066,7 +3066,7 @@ var ModalDialog = /** @class */ (function (_super) {
         return _this;
     }
     ModalDialog.prototype.__innerCloseDom = function (mode) {
-        var _a, _b, _c, _d;
+        var _a, _b, _c;
         try {
             var d = mode === null || mode === void 0 ? void 0 : mode.toString();
             var dataBody = undefined;
@@ -3091,7 +3091,6 @@ var ModalDialog = /** @class */ (function (_super) {
                 if (value) {
                     error = value === null || value === void 0 ? void 0 : value.message;
                 }
-                (_c = this.props._promise) === null || _c === void 0 ? void 0 : _c.reject(new Error(error));
                 if (this.props._promise) {
                     this.props._promise.reject(new Error(error));
                 }
@@ -3101,7 +3100,7 @@ var ModalDialog = /** @class */ (function (_super) {
                 console.error(e);
             }
             finally {
-                (_d = this.props.__actionUnmount) === null || _d === void 0 ? void 0 : _d.call(undefined);
+                (_c = this.props.__actionUnmount) === null || _c === void 0 ? void 0 : _c.call(undefined);
             }
         }
     };

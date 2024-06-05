@@ -243,8 +243,6 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
                     error = (value as ErrorEvent)?.message;
                 }
 
-                this.props._promise?.reject(new Error(error));
-
                 if (this.props._promise) {
                     this.props._promise.reject(new Error(error));
                 }

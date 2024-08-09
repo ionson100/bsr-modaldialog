@@ -1,6 +1,4 @@
 import React, {ReactElement} from "react";
-
-///import "./index.css"
 import {IoMdClose} from "react-icons/io";
 import {hostDialog} from "./storegeDialog";
 import {v4 as uuidv4} from 'uuid';
@@ -177,9 +175,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
     public selfClose: (mode: string | undefined) => void = (mode) => {
 
         const modeCore = mode ? mode : "no data"
-        this.props._promise?.resolve({ok: true, mode: modeCore, dataBody: this.innerGetData!(mode!)});
-        this.props.__actionUnmount?.call(undefined)
-
+        this.__innerCloseDom(modeCore);
     };
 
 

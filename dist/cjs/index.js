@@ -3030,10 +3030,8 @@ var ModalDialog = /** @class */ (function (_super) {
         var props = _a.props;
         var _this = _super.call(this, props) || this;
         _this.selfClose = function (mode) {
-            var _a, _b;
             var modeCore = mode ? mode : "no data";
-            (_a = _this.props._promise) === null || _a === void 0 ? void 0 : _a.resolve({ ok: true, mode: modeCore, dataBody: _this.innerGetData(mode) });
-            (_b = _this.props.__actionUnmount) === null || _b === void 0 ? void 0 : _b.call(undefined);
+            _this.__innerCloseDom(modeCore);
         };
         _this.closeModal = function () {
             _this.clickButton("-1");

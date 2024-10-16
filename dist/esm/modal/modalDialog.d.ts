@@ -2,7 +2,7 @@ import React, { ReactElement } from "react";
 export type ResolvePromise = {
     ok: boolean;
     mode: string | null | undefined;
-    dataBody?: object | undefined;
+    dataBody?: any | undefined;
 };
 export type ParamsDialog = {
     /**

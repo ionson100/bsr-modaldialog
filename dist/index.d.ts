@@ -3,7 +3,7 @@ import React, { ReactElement } from 'react';
 type ResolvePromise = {
     ok: boolean;
     mode: string | null | undefined;
-    dataBody?: object | undefined;
+    dataBody?: any | undefined;
 };
 type ParamsDialog = {
     /**
@@ -136,13 +136,13 @@ declare class ModalDialog extends React.Component<ParamsDialog, any> {
 
 declare function ShowBsrDialog(props: ParamsDialog): Promise<ResolvePromise>;
 
-declare abstract class BaseBodyDialog extends React.Component<any, any> {
+declare abstract class BaseBodyDialog<T = any> extends React.Component<T, any> {
     _id?: string;
     private selfCloseCore;
-    constructor(props: any);
+    protected constructor(props: Readonly<T>);
     selfClose(mode?: string): void;
     abstract validate(mode: string | undefined): boolean | undefined;
-    abstract getData(mode: string | undefined): object | undefined;
+    abstract getData(mode: string | undefined): any | undefined;
 }
 
 export { BaseBodyDialog, ModalDialog, type ParamsDialog, ShowBsrDialog };

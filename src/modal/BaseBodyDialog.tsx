@@ -5,7 +5,7 @@ export abstract class BaseBodyDialog<T= any> extends React.Component<T, any> {
     public _id?: string
 
     private selfCloseCore:((modeId?:string)=>void)|undefined
-    protected constructor(props: Readonly<T>) {
+     constructor(props: Readonly<T>) {
         super(props);
         this._id = undefined
         this.selfCloseCore=undefined

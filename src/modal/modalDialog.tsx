@@ -150,7 +150,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
     public body: any | undefined;
     public promiseInfo: object
 
-    public mRefDialog: React.RefObject<HTMLDivElement>
+    public mRefDialog: React.RefObject<HTMLDivElement | null>
     private focusable: {
         firstFocusableEl: HTMLElement | undefined,
         lastFocusableEl: HTMLElement | undefined
@@ -158,11 +158,11 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
     public formClose: HTMLFormElement | undefined
 
 
-    public mRefButtonHost: React.RefObject<HTMLDivElement>
-    public mRefHeaderHost: React.RefObject<HTMLDivElement>
-    public mRefBodyHost: React.RefObject<HTMLDivElement>
-    public mRefFocusDiv: React.RefObject<HTMLDivElement>
-    public mRefAssDiv: React.RefObject<HTMLDivElement>
+    public mRefButtonHost: React.RefObject<HTMLDivElement | null>
+    public mRefHeaderHost: React.RefObject<HTMLDivElement | null>
+    public mRefBodyHost: React.RefObject<HTMLDivElement | null>
+    public mRefFocusDiv: React.RefObject<HTMLDivElement | null>
+    public mRefAssDiv: React.RefObject<HTMLDivElement | null>
 
 
     public oldDialog: ModalDialog | undefined
@@ -409,7 +409,11 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         const divs: ReactElement[] = [];
         let add = true;
         this.props.buttons!.forEach((button, index) => {
+
+
+            // @ts-ignore
             const dataMode: string | null | undefined = button.props['data-mode']
+            // @ts-ignore
             const focus = button.props['data-focus']
             if (focus && add) {
 

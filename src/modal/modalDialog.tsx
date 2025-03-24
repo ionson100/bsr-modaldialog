@@ -150,7 +150,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
     public body: any | undefined;
     public promiseInfo: object
 
-    public mRefDialog: React.RefObject<HTMLDivElement | null>
+    public mRefDialog: React.RefObject<HTMLDivElement >
     private focusable: {
         firstFocusableEl: HTMLElement | undefined,
         lastFocusableEl: HTMLElement | undefined
@@ -158,11 +158,11 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
     public formClose: HTMLFormElement | undefined
 
 
-    public mRefButtonHost: React.RefObject<HTMLDivElement | null>
-    public mRefHeaderHost: React.RefObject<HTMLDivElement | null>
-    public mRefBodyHost: React.RefObject<HTMLDivElement | null>
-    public mRefFocusDiv: React.RefObject<HTMLDivElement | null>
-    public mRefAssDiv: React.RefObject<HTMLDivElement | null>
+    public mRefButtonHost: React.RefObject<HTMLDivElement >
+    public mRefHeaderHost: React.RefObject<HTMLDivElement >
+    public mRefBodyHost: React.RefObject<HTMLDivElement >
+    public mRefFocusDiv: React.RefObject<HTMLDivElement >
+    public mRefAssDiv: React.RefObject<HTMLDivElement >
 
 
     public oldDialog: ModalDialog | undefined

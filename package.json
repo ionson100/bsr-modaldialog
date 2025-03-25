@@ -1,6 +1,6 @@
 {
   "name": "bsr-modaldialog",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "description": " react async dialog",
   "author": "ionson100",
   "license": "MIT",
@@ -17,11 +17,10 @@
   "private": true,
 
   "peerDependencies": {
-    "react": "*"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
-  "dependencies": {
 
-  },
   "scripts": {
     "build": "rollup -c --bundleConfigAsCjs && @powershell copy  ./src/modal/index.css ./dist"
   },
@@ -44,10 +43,9 @@
     ]
   },
   "devDependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "@types/react": "^18.3.20",
-    "@types/react-dom": "^18.3.5",
+
+    "@types/react": "^19.0.12",
+    "@types/react-dom": "^19.0.4",
 
     "@types/jest": "^27.5.2",
     "@types/node": "^16.18.97",
@@ -67,7 +65,7 @@
     "eslint-plugin-react": "^7.26.1",
     "postcss": "^8.4.38",
     "postcss-modules": "^6.0.0",
-    "rollup": "4.22.4",
+    "rollup": "4.37.0",
     "rollup-plugin-css-only": "^4.5.2",
     "rollup-plugin-dts": "^6.1.0",
     "rollup-plugin-import-css": "^3.5.0",

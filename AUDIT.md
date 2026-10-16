@@ -146,12 +146,22 @@ npm audit: 80 (4 critical, 45 high, 17 moderate, 14 low)
   `onCancel`, `timeOut`, `onClose`/`onShow`, восстановление фокуса, ловушка фокуса,
   хуки в контенте, `getData`/`validate`/`selfClose`, вложенные диалоги, ошибка в
   контенте, ESM-вход, отсутствие React в бандле, доступность `dist/index.css`.
-- **Инфраструктура**: добавлены `LICENSE` (MIT) и `CHANGELOG.md`.
+- **Инфраструктура**: добавлены `LICENSE` (MIT), `CHANGELOG.md` и GitHub Actions
+  CI (`.github/workflows/ci.yml` — Node 22 и 24: `npm ci` + `npm run lint` + `npm test`).
 
 ## Проверка интеграции с `audio_map_80/client`
 
-Отдельный стенд с React 18.3.1, `@types/react` 18.3.31, TypeScript 5.7.3 и
-Vite 8.3.4 (всё из `node_modules` потребителя), плюс собранный пакет:
+Проверка в самом проекте `audio_map_80/client`: собранный пакет 3.1.0 подменялся
+в `node_modules/bsr-modaldialog` на время проверки (после чего восстановлен 2.3.7):
+
+- baseline `tsc -b --force` с 2.3.7 — 0 ошибок;
+- `tsc -b --force` по **всему приложению** с 3.1.0 — 0 ошибок;
+- `vite build` — успешно (960 модулей), css библиотеки попал в бандл
+  (`dist/assets/dist-*.css`, 1.47 КБ);
+- `git status` клиента после проверки чистый.
+
+Дополнительно — отдельный стенд с React 18.3.1, `@types/react` 18.3.31,
+TypeScript 5.7.3 и Vite 8.3.4 (всё из `node_modules` потребителя):
 
 1. `tsc -p tsconfig.json` с **их** конфигом (`moduleResolution: "bundler"`,
    `noUncheckedSideEffectImports`, `noUnusedLocals`) — 0 ошибок.
@@ -211,17 +221,15 @@ React обновлять не нужно (диапазон peer включает
 7. **ESM-файл `.mjs`** — теперь корректно, но `dist/cjs` и `dist/esm` дублируют
    логику (нет единого `dist/index.mjs` для браузера). Для библиотеки на 10 КБ это
    нормально.
-8. **Нет CI** — стоит добавить GitHub Actions с `npm ci && npm run lint && npm test`,
-   тогда `npm test` (сборка + тесты) будет проверяться на каждый PR.
-9. **`public/`** (favicon, `index.html`, `manifest.json`, логотипы) — мусор от
+8. **`public/`** (favicon, `index.html`, `manifest.json`, логотипы) — мусор от
    Create React App, библиотеке не нужен; не удалял.
-10. **`.idea/` закоммичен** — стандартная гигиена: убрать из git и добавить в
-    `.gitignore`.
-11. **Остаточные 7 уязвимостей** — в dev-инструментарии (`rollup`,
+9. **`.idea/` закоммичен** — стандартная гигиена: убрать из git и добавить в
+   `.gitignore`.
+10. **Остаточные 7 уязвимостей** — в dev-инструментарии (`rollup`,
     `@rollup/plugin-terser` → `serialize-javascript`, `eslint` и их транзитивные
     зависимости); в публикуемый пакет они не попадают. У части из них
     исправленной версии пока нет — это ожидаемо и не влияет на `dist`.
-12. **`useDefineForClassFields`** — проект потребителя использует
+11. **`useDefineForClassFields`** — проект потребителя использует
     `useDefineForClassFields: true`, а библиотека собирается с `target: es5`
     (свои `__extends`). Совместимо, но при следующем мажоре стоит поднять `target`.
 

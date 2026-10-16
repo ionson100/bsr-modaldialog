@@ -42,7 +42,7 @@
     "lint": "eslint .",
     "pretest": "npm run build",
     "test": "node --test --test-force-exit \"test/*.test.cjs\" \"test/*.test.mjs\"",
-    "prepublishOnly": "npm test"
+    "prepack": "npm test"
   },
 
   "devDependencies": {

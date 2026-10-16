@@ -27,4 +27,4 @@ jobs:
       - run: npm test
       # dist лежит в репозитории (установка через github:) - он не должен устаревать
       - name: Check that the committed dist matches the build
-        run: git diff --exit-code -- dist
+        run: git diff --exit-code --ignore-cr-at-eol -- dist

@@ -188,15 +188,34 @@ css-классы `main-dialog`, `ass-dialog`, `m-header`, `m-body`, `m-footer`,
 
 ### Как поставить потребителю
 
-```jsonc
-// audio_map_80/client/package.json
-"bsr-modaldialog": "^3.1.0"   // вместо "^2.3.7"
-```
+Публикация (нужен npm-аккаунт; `prepack` перед упаковкой прогонит сборку и тесты):
+
 ```bash
-npm install
+cd bsr-modaldialog
+npm login
+npm publish
+
+cd ../audio_map_80/client
+npm install bsr-modaldialog@^3.1.0
 ```
-React обновлять не нужно (диапазон peer включает 18.3). Для локальной отладки
-можно использовать `file:` / `npm link`.
+
+Пока 3.1.0 не опубликован, пакет подключён через локальный тарболл — это
+временный мост. Именно тарболл, а не `file:`-ссылка на каталог: npm копирует
+содержимое тарболла в `node_modules`, тогда как каталог симлинкуется, и тогда
+`react` из библиотеки резолвился бы в `node_modules` самой библиотеки (React 19),
+то есть вернулась бы вторая копия React.
+
+- `client/vendor/bsr-modaldialog-3.1.0.tgz` (11 КБ, создан `npm pack`);
+- `client/package.json`: `"bsr-modaldialog": "file:vendor/bsr-modaldialog-3.1.0.tgz"`;
+- после `npm install`: `node_modules/bsr-modaldialog@3.1.0` — реальная копия
+  (не симлинк), `react` и `react-dom/client` из неё резолвятся в React 18.3.1
+  приложения; запись в `package-lock.json` с integrity-hash, так что `npm ci`
+  воспроизводим.
+
+После публикации: заменить значение на `"^3.1.0"`, выполнить `npm install` и
+удалить каталог `vendor/`.
+
+React обновлять не нужно (диапазон peer включает 18.3).
 
 После этого обходной путь в `Tip.tsx` (классовый тултип из-за `Invalid hook call`)
 становится не нужен — но это уже решение владельца кода.

@@ -1,15 +1,11 @@
-
-
-
-
-import {ParamsDialog} from "./modalDialog";
+import {ParamsDialog, ResolvePromise} from "./modalDialog";
 import {WrapperModal} from "./wrapperModal";
 
 
-export default async function ShowBsrDialog(props: ParamsDialog) {
+export default function ShowBsrDialog(props: ParamsDialog): Promise<ResolvePromise> {
 
     const wrap = new WrapperModal();
-    return await wrap.showModalDialog(props);
+    return wrap.showModalDialog(props);
 
 
 }

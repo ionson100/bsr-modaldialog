@@ -1,7 +1,8 @@
 import React, {ReactElement} from "react";
 import {IoMdClose} from "react-icons/io";
 import {hostDialog} from "./storegeDialog";
-import {v4 as uuidv4} from 'uuid';
+import {createId} from "./createId";
+import {FOCUSABLE_SELECTOR} from "./focusable";
 import {findHighestZIndex} from "./maxZIndex";
 
 
@@ -129,7 +130,7 @@ export type ParamsDialog = {
 }
 
 
-export class ModalDialog extends React.Component<ParamsDialog, any> {
+export class ModalDialog extends React.Component<ParamsDialog, { hasError: boolean }> {
 
     static defaultProps: ParamsDialog = {
         _id: undefined,
@@ -147,14 +148,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
 
     }
 
-    public body: any | undefined;
-    public promiseInfo: object
-
     public mRefDialog: React.RefObject<HTMLDivElement | null>
-    private focusable: {
-        firstFocusableEl: HTMLElement | undefined,
-        lastFocusableEl: HTMLElement | undefined
-    }
     public formClose: HTMLFormElement | undefined
 
 
@@ -166,10 +160,17 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
 
 
     public oldDialog: ModalDialog | undefined
-    public moduleIdCore: string;
+    public moduleIdCore: string
     public innerValidate: ((mode: string | undefined) => boolean | undefined) | undefined
     public innerGetData: ((mode: string | undefined) => object | undefined) | undefined
     public lastFocus: Element | null;
+
+    /**
+     * The dialog is closed exactly once: the promise is settled, `onClose` fires
+     * and the React root is unmounted only on the first call.
+     */
+    private closed: boolean
+    private timer: ReturnType<typeof setTimeout> | undefined
 
 
     public selfClose: (mode: string | undefined) => void = (mode) => {
@@ -179,19 +180,15 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
     };
 
 
-    constructor({props}: { props: Readonly<ParamsDialog> }) {
+    constructor(props: Readonly<ParamsDialog>) {
         super(props);
-        this.focusable = {
-            lastFocusableEl: undefined,
-            firstFocusableEl: undefined
-        }
-
-        this.promiseInfo = {};
         this.state = {
-            isShow: false
+            hasError: false
         }
+        this.closed = false;
+        this.timer = undefined;
         this.oldDialog = undefined
-        this.moduleIdCore = uuidv4()
+        this.moduleIdCore = createId()
         this.innerValidate = undefined
         this.innerGetData = undefined;
         this.mRefHeaderHost = React.createRef<HTMLDivElement>();
@@ -205,13 +202,25 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         this.KeuUpEsc = this.KeuUpEsc.bind(this)
         this.FocusTab = this.FocusTab.bind(this)
         this.ClickDialog = this.ClickDialog.bind(this)
-        this.lastFocus = document.activeElement
+        this.lastFocus = null
         this.formClose = undefined;
+        // `hostDialog` keeps track of the topmost dialog (nested dialogs are
+        // supported). Done in the constructor - not in componentDidMount - on
+        // purpose: the body components register themselves during their own
+        // construction, i.e. before any didMount of this dialog runs.
         this.checkGlobal();
 
     }
 
+    /**
+     * Settles the promise, calls `onClose` and unmounts the dialog.
+     * `mode` -1 / -2 mean "cancelled" and produce `ok: false`.
+     */
     __innerCloseDom(mode: string | null | undefined) {
+
+        if (this.closed) {
+            return;
+        }
 
         try {
             const d: string | null | undefined = mode?.toString();
@@ -230,7 +239,15 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
                 res = false;
             }
 
+            this.closed = true;
+            this.clearTimer();
+
             this.props._promise?.resolve({ok: res, mode: d, dataBody: dataBody});
+
+            if (this.props.onClose) {
+                this.props.onClose(this.dialog ?? undefined)
+            }
+
             this.props.__actionUnmount?.call(undefined)
         } catch (value) {
             try{
@@ -239,8 +256,12 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
                     error = (value as ErrorEvent)?.message;
                 }
 
-                if (this.props._promise) {
-                    this.props._promise.reject(new Error(error));
+                if (!this.closed) {
+                    this.closed = true;
+                    this.clearTimer();
+                    if (this.props._promise) {
+                        this.props._promise.reject(new Error(error));
+                    }
                 }
                 console.error(error)
             }catch (e){
@@ -259,8 +280,28 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
 
     checkGlobal() {
 
+        if (hostDialog.currentDialog === this) {
+            // a second constructor call (StrictMode / re-mount) must not make
+            // the dialog its own predecessor
+            return;
+        }
         this.oldDialog = hostDialog.currentDialog
         hostDialog.currentDialog = this;
+    }
+
+    private clearTimer() {
+        if (this.timer !== undefined) {
+            clearTimeout(this.timer);
+            this.timer = undefined;
+        }
+    }
+
+    private getFocusableElements(): HTMLElement[] {
+        const root = this.mRefDialog.current;
+        if (!root) {
+            return [];
+        }
+        return Array.prototype.slice.call(root.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
     }
 
     private FocusTab(e: KeyboardEvent) {
@@ -269,14 +310,24 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
             if (!isTabPressed) {
                 return;
             }
+            const focusableEls = this.getFocusableElements();
+            if (focusableEls.length === 0) {
+                return;
+            }
+            const firstFocusableEl = focusableEls[0];
+            const lastFocusableEl = focusableEls[focusableEls.length - 1];
+            const root = this.mRefDialog.current;
+            const active: Element | null = document.activeElement;
+            const inside = !!(root && active && root.contains(active));
+
             if (e.shiftKey) {
-                if (document.activeElement === this.focusable.firstFocusableEl) {
-                    (this.focusable.lastFocusableEl as HTMLElement).focus();
+                if (!inside || active === firstFocusableEl) {
+                    lastFocusableEl.focus();
                     e.preventDefault();
                 }
             } else {
-                if (document.activeElement === this.focusable.lastFocusableEl) {
-                    (this.focusable.firstFocusableEl as HTMLElement).focus();
+                if (!inside || active === lastFocusableEl) {
+                    firstFocusableEl.focus();
                     e.preventDefault();
                 }
             }
@@ -284,6 +335,8 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
     }
 
     componentDidMount() {
+
+        this.lastFocus = document.activeElement;
 
         /*__________close form__________*/
         const formsCloseList: NodeListOf<HTMLFormElement> | undefined = this.mRefDialog.current?.querySelectorAll('form');
@@ -301,23 +354,7 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
             }
         }
         /*___________________trap-focus______________________*/
-
-        const focusableEls: NodeListOf<HTMLElement> | undefined = this.mRefDialog.current?.querySelectorAll('' +
-            'area[href]:not([tabindex=\'-1\']),' +
-            'iframe:not([tabindex=\'-1\']),' +
-            '[tabindex]:not([tabindex=\'-1\']),' +
-            '[contentEditable=true]:not([tabindex=\'-1\']),' +
-
-            'a[href]:not([disabled]):not([tabindex=\'-1\']),' +
-            ' button:not([disabled]):not([tabindex=\'-1\']),' +
-            ' textarea:not([disabled]):not([tabindex=\'-1\']),' +
-            ' input:not([disabled]):not([tabindex=\'-1\']),' +
-            ' select:not([disabled]):not([tabindex=\'-1\'])');
-        if (focusableEls) {
-            this.focusable.firstFocusableEl = focusableEls[0];
-            this.focusable.lastFocusableEl = focusableEls[focusableEls.length - 1];
-        }
-
+        /* the list of focusable elements is evaluated on every Tab press, see FocusTab */
 
         window.addEventListener("keydown", this.FocusTab)
         if (this.props.modal === true) {
@@ -328,11 +365,8 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
 
         } else {
             this.mRefDialog.current?.setAttribute('aria-modal', 'false')
-            this.mRefAssDiv.current!.style.visibility = 'hidden'
-        }
-        this.dialog!.onclose = () => {
-            if (this.props.onClose) {
-                this.props.onClose(this.dialog!)
+            if (this.mRefAssDiv.current) {
+                this.mRefAssDiv.current.style.visibility = 'hidden'
             }
         }
 
@@ -350,21 +384,29 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         }
         if (this.props.position === 'top') {
 
-            this.mRefDialog.current!.style.top = "-60%"
+            if (this.mRefDialog.current) {
+                this.mRefDialog.current.style.top = "-60%"
+            }
 
         }
         if (this.props.onShow) {
             this.props.onShow(this.dialog!)
         }
+
+        const zet: number = findHighestZIndex('div');
+        if (this.mRefAssDiv.current) {
+            this.mRefAssDiv.current.style.zIndex = "" + (zet + 1)
+        }
+        if (this.mRefDialog.current) {
+            this.mRefDialog.current.style.zIndex = "" + (zet + 2)
+        }
+
         if (this.props.timeOut) {
-            setTimeout(() => {
+            this.timer = setTimeout(() => {
+                this.timer = undefined;
                 this.__innerCloseDom('-1')
             }, this.props.timeOut)
         }
-
-        const zet: number = findHighestZIndex('div');
-        this.mRefAssDiv.current!.style.zIndex = "" + (zet + 1)
-        this.mRefDialog.current!.style.zIndex = "" + (zet + 2)
 
     }
 
@@ -372,28 +414,64 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
         return this.mRefDialog.current
     }
 
+    /**
+     * Keeps an error thrown by the dialog content from leaving the caller
+     * with a promise that never settles: the promise is rejected and the
+     * dialog is unmounted.
+     */
+    static getDerivedStateFromError() {
+        return {hasError: true};
+    }
+
+    componentDidCatch(error: unknown) {
+        if (this.closed) {
+            return;
+        }
+        this.closed = true;
+        this.clearTimer();
+        const err = error instanceof Error
+            ? error
+            : new Error(typeof error === 'string' ? error : 'bsr-modaldialog: unknown error');
+        console.error('bsr-modaldialog:', err);
+        this.props._promise?.reject(err);
+        // unmount outside of the commit phase
+        setTimeout(() => {
+            this.props.__actionUnmount?.call(undefined)
+        }, 0);
+    }
+
 
     componentWillUnmount() {
-        hostDialog.currentDialog = this.oldDialog;
-
-
-        // if (hostDialog.moduleId === this.moduleIdCore) {
-        //     hostDialog.currentDialog = undefined;
-        //     hostDialog.moduleId = undefined;
-        // } else {
-        //     hostDialog.currentDialog = this.oldDialog;
-        // }
+        this.clearTimer();
+        if (hostDialog.currentDialog === this) {
+            hostDialog.currentDialog = this.oldDialog;
+        }
         if (this.props.modal) {
             window.removeEventListener("keyup", this.KeuUpEsc)
 
         }
         window.removeEventListener("keydown", this.FocusTab)
 
-        document.body.removeChild<Node>(this.props.__container as Node);
-        if (this.lastFocus) {
-            (this.lastFocus as HTMLElement)!.focus()
+        if (!this.closed) {
+            // the dialog was unmounted from the outside - do not leave the
+            // caller waiting forever
+            this.closed = true;
+            this.props._promise?.resolve({ok: false, mode: undefined, dataBody: undefined});
         }
-        // this.__innerCloseDom(undefined)
+
+        const container = this.props.__container as (Node & { parentNode?: Node | null }) | undefined;
+        if (container && container.parentNode) {
+            container.parentNode.removeChild(container);
+        }
+
+        const lastFocus = this.lastFocus as HTMLElement | null;
+        if (lastFocus && typeof lastFocus.focus === 'function' && document.contains(lastFocus)) {
+            try {
+                lastFocus.focus();
+            } catch {
+                // the previously focused element can not be focused anymore
+            }
+        }
     }
 
     closeModal = () => {
@@ -408,12 +486,12 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
     renderButtons(): any {
         const divs: ReactElement[] = [];
         let add = true;
-        this.props.buttons!.forEach((button, index) => {
+        (this.props.buttons ?? []).forEach((button, index) => {
 
 
-            // @ts-ignore
+            // @ts-expect-error data-mode is read from the button element provided by the consumer
             const dataMode: string | null | undefined = button.props['data-mode']
-            // @ts-ignore
+            // @ts-expect-error data-focus is read from the button element provided by the consumer
             const focus = button.props['data-focus']
             if (focus && add) {
 
@@ -435,8 +513,12 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
     }
 
 
-    render() {
+    render(): React.ReactNode {
 
+        if (this.state.hasError) {
+            // error fallback, the promise is already rejected in componentDidCatch
+            return null;
+        }
 
         return (
             <>
@@ -473,7 +555,6 @@ export class ModalDialog extends React.Component<ParamsDialog, any> {
 
                 </div>
             </>
-
         );
     }
 

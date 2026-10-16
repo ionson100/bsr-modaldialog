@@ -1,28 +1,39 @@
 import React from "react";
 import {ModalDialog, ParamsDialog, ResolvePromise} from "./modalDialog";
 import ReactDOM from "react-dom/client";
-import {v4 as uuidv4} from 'uuid';
+import {createId} from "./createId";
 
 export class WrapperModal {
 
-    async showModalDialog(props: ParamsDialog) {
+    showModalDialog(props: ParamsDialog): Promise<ResolvePromise> {
 
         return new Promise<ResolvePromise>((resolve, reject) => {
-            const uuid = uuidv4();
-            const myDiv = document.createElement('div',)
-            myDiv.setAttribute("id", uuid);
+            const id = createId();
+            const myDiv = document.createElement('div')
+            myDiv.setAttribute("id", id);
             myDiv.setAttribute("data-root-m-dialog", 'true');
             document.body.append(myDiv);
-            props.__container = myDiv
-            props._id = uuid;
-            props._promise = {reject: reject, resolve: resolve}
-            const root = ReactDOM.createRoot(myDiv);
 
-            props.__actionUnmount=()=>{
-                root.unmount()
-            }
+            const root = ReactDOM.createRoot(myDiv);
+            let unmounted = false;
+
+            // the object passed by the caller is not modified anymore
+            const dialogProps: ParamsDialog = {
+                ...props,
+                __container: myDiv,
+                _id: id,
+                _promise: {reject: reject, resolve: resolve},
+                __actionUnmount: () => {
+                    if (unmounted) {
+                        return;
+                    }
+                    unmounted = true;
+                    root.unmount()
+                }
+            };
+
             root.render(
-                <ModalDialog ref={props.refDialog}  {...props} />
+                <ModalDialog ref={props.refDialog} {...dialogProps} />
             );
         })
     }

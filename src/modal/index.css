@@ -1,5 +1,5 @@
 .ass-dialog{
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
@@ -12,7 +12,7 @@
 .main-dialog {
     display: block;
 
-    position: absolute;
+    position: fixed;
     margin: auto;
     top: 0;
     right: 0;
@@ -34,23 +34,6 @@
 
 
 
-
-
-.icon-close {
-    color: black;
-    cursor: pointer;
-    size: 25px;
-}
-
-.icon-close:hover {
-    color: #ffffff;
-    background: darkgray;
-}
-
-.icon-close:active {
-    color: #f10a0a;
-    background: darkgray;
-}
 
 
 .m-header {

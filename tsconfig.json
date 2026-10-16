@@ -2,6 +2,7 @@
   "compilerOptions": {
     // по умолчанию
     "target": "es5",
+    "lib": ["DOM", "ES2020"],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
@@ -12,11 +13,9 @@
     "module": "ESNext",
     "declaration": true,
     "sourceMap": false,
-    "outDir": "dist",
+    "outDir": "dist/esm",
     "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "emitDeclarationOnly": true,
-
-
-  }
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["src"]
 }

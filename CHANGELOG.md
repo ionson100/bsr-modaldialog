@@ -51,7 +51,11 @@
   в devDependencies).
 - Добавлены `exports` и `sideEffects`; `./dist/index.css` и `./dist/*` оставлены
   доступными (их использует `audio_map_80/client`).
-- `dist/` убран из git и добавлен в `.gitignore`.
+- `dist/` остаётся в git: пакет раздаётся и как
+  `github:ionson100/bsr-modaldialog` (как остальные bsr-* библиотеки), где
+  потребителю не нужен шаг сборки и install-скрипты. В `dist` больше нет React
+  (34 КБ вместо 3.3 МБ), устаревшие `dist/*/modal/*.d.ts` удалены, CI проверяет
+  соответствие закоммиченного `dist` сборке.
 - Сборка кросс-платформенная (`node scripts/copy-css.mjs` вместо
   `@powershell copy`), добавлена минификация (terser) и шаг `tsc` для типов.
 - Удалён `react-scripts` и ~1400 неиспользуемых транзитивных пакетов:

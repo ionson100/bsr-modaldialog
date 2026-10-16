@@ -16,6 +16,15 @@ npm install --save bsr-modaldialog
 React is **not** bundled into the package - the dialog renders with the React
 instance of your application, so hooks work in the dialog content.
 
+### Install from GitHub
+
+```bash
+npm install --save github:ionson100/bsr-modaldialog#v3.1.0
+```
+
+The repository contains the already built `dist`, so the package can be consumed
+without npm and without a build step on your side.
+
 ## Usage
 
 ```tsx

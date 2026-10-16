@@ -25,3 +25,6 @@ jobs:
       - run: npm run lint
       # npm test собирает пакет (pretest) и запускает тесты на jsdom
       - run: npm test
+      # dist лежит в репозитории (установка через github:) - он не должен устаревать
+      - name: Check that the committed dist matches the build
+        run: git diff --exit-code -- dist

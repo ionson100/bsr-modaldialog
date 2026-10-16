@@ -117,7 +117,13 @@ npm audit: 80 (4 critical, 45 high, 17 moderate, 14 low)
   на Linux/macOS), добавлены минификация (terser) и шаг `tsc --emitDeclarationOnly`
   (декларации перестали дублироваться в `dist/cjs/esm/`, устаревшие
   `dist/*/modal/*.d.ts` удалены).
-- **`dist/`** убран из git и добавлен в `.gitignore`.
+- **`dist/`** остаётся в git осознанно: пакет раздаётся и как
+  `github:ionson100/bsr-modaldialog` (как `bsr-left-sidebar`, `bsr-observer`,
+  `bsr-route`), а у потребителя не должно быть шага сборки и install-скриптов
+  (npm 11 предупреждает про `allowScripts`). После аудита `dist` стал 34 КБ
+  вместо 3.3 МБ - в нём больше нет двух копий React. Устаревшие
+  `dist/*/modal/*.d.ts` удалены, шаг CI следит за тем, чтобы закоммиченный `dist`
+  совпадал со сборкой.
 - **`exports` + `sideEffects`**. Важно: `./dist/index.css` и `./dist/*` обязаны
   остаться доступными, иначе ломается `import "bsr-modaldialog/dist/index.css"`
   у потребителя. Проверено негативным контролем (без этих ключей):
